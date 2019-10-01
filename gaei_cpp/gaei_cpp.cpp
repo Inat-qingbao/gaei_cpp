@@ -2,7 +2,6 @@
 //
 
 #include <iostream>
-#include "ouchilib/result/result.hpp"
 
 int main()
 {
