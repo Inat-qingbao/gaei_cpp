@@ -17,18 +17,24 @@ struct vector {
     /// <summary>
     /// 点が1次元以上である場合のみ有効です。点のx座標への参照を返します。
     /// </summary>
-    template<size_t D = Dim, std::enable_if_t<(D > 1)>* = nullptr>
+    template<size_t D = Dim, std::enable_if_t<(D >= 1)>* = nullptr>
     constexpr T& x() noexcept { return coord[0]; };
+    template<size_t D = Dim, std::enable_if_t<(D >= 1)>* = nullptr>
+    constexpr const T& x() const noexcept { return coord[0]; };
     /// <summary>
     /// 点が2次元以上である場合のみ有効です。点のy座標への参照を返します。
     /// </summary>
-    template<size_t D = Dim, std::enable_if_t<(D > 2)>* = nullptr>
+    template<size_t D = Dim, std::enable_if_t<(D >= 2)>* = nullptr>
     constexpr T& y() noexcept { return coord[1]; };
+    template<size_t D = Dim, std::enable_if_t<(D >= 2)>* = nullptr>
+    constexpr const T& y() const noexcept { return coord[1]; };
     /// <summary>
     /// 点が3次元以上である場合のみ有効です。点のz座標への参照を返します。
     /// </summary>
-    template<size_t D = Dim, std::enable_if_t<(D > 3)>* = nullptr>
+    template<size_t D = Dim, std::enable_if_t<(D >= 3)>* = nullptr>
     constexpr T& z() noexcept { return coord[2]; };
+    template<size_t D = Dim, std::enable_if_t<(D >= 3)>* = nullptr>
+    constexpr const T& z() const noexcept { return coord[2]; };
 };
 
 using vec2f = vector<float, 2>;
