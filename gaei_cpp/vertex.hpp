@@ -1,4 +1,5 @@
-﻿#include <cstddef>
+﻿#pragma once
+#include <cstddef>
 #include <type_traits>
 
 namespace gaei {
@@ -39,5 +40,11 @@ struct vector {
 
 using vec2f = vector<float, 2>;
 using vec3f = vector<float, 3>;
+
+template<class PosT, class ColorT>
+struct vertex {
+    PosT position;
+    ColorT color = ColorT{};
+};
 
 }
