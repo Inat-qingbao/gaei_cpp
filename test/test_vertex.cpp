@@ -1,7 +1,7 @@
 ﻿#include "ouchitest.hpp"
 #include "vertex.hpp"
 
-OUCHI_TEST_CASE(test_vertex_instantiate)
+OUCHI_TEST_CASE(test_vector_instantiate)
 {
     gaei::vec2f v2;
     v2.y() = 0;
