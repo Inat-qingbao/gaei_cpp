@@ -2,6 +2,7 @@
 //
 
 #include <iostream>
+#include "vertex.hpp"
 
 int main()
 {

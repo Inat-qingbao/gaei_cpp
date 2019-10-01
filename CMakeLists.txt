@@ -4,6 +4,12 @@
 cmake_minimum_required (VERSION 3.8)
 
 project ("gaei_cpp")
+enable_testing()
 
 # サブプロジェクトを含めます。
 add_subdirectory ("gaei_cpp")
+add_subdirectory ("test")
+
+add_test (test01 "gaei_test")
+add_test (test01 "gaei_test")
+
