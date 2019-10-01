@@ -20,7 +20,9 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
 endif()
 
 include_directories("./ouchitest/include")
+include_directories("../gaei_cpp/thirdparty/ouchilib/include")
+include_directories("../gaei_cpp")
 
 # ソースをこのプロジェクトの実行可能ファイルに追加します。
-add_executable (gaei_test "test_main.cpp")
+add_executable (gaei_test "test_main.cpp" "test_vertex.cpp")
 
