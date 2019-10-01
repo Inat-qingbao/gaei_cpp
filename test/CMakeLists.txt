@@ -24,5 +24,9 @@ include_directories("../gaei_cpp/thirdparty/ouchilib/include")
 include_directories("../gaei_cpp")
 
 # ソースをこのプロジェクトの実行可能ファイルに追加します。
-add_executable (gaei_test "test_main.cpp" "test_vertex.cpp" "test_dat_loader.cpp")
-
+add_executable (
+	gaei_test 
+	"test_main.cpp"
+	"test_vertex.cpp"
+	"test_dat_loader.cpp"
+)

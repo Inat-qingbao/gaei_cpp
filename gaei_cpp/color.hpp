@@ -24,19 +24,23 @@ struct color {
     constexpr std::uint8_t g() const noexcept { return static_cast<std::uint8_t>(value >> 8); }
     constexpr std::uint8_t b() const noexcept { return static_cast<std::uint8_t>(value >> 0); }
 
-    void a(std::uint8_t alpha) noexcept {
+    void a(std::uint8_t alpha) noexcept
+    {
         value &= (~0xFF) << 24;
         value |= static_cast<std::uint32_t>(alpha) << 24;
     }
-    void r(std::uint8_t red) noexcept {
+    void r(std::uint8_t red) noexcept
+    {
         value &= (~0xFF) << 16;
         value |= static_cast<std::uint32_t>(red) << 16;
     }
-    void g(std::uint8_t green) noexcept {
+    void g(std::uint8_t green) noexcept
+    {
         value &= (~0xFF) << 8;
         value |= static_cast<std::uint32_t>(green) << 8;
     }
-    void b(std::uint8_t blue) noexcept {
+    void b(std::uint8_t blue) noexcept
+    {
         value &= (~0xFF);
         value |= static_cast<std::uint32_t>(blue);
     }
