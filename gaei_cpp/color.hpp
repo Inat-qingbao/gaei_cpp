@@ -8,13 +8,13 @@ struct color {
                     std::uint8_t green,
                     std::uint8_t blue,
                     std::uint8_t alpha = 0xFF)
-        : value{}
-    {
-        a(alpha);
-        r(red);
-        g(green);
-        b(blue);
-    }
+        : value(
+            static_cast<std::uint32_t>(alpha) << 24 |
+            static_cast<std::uint32_t>(red) << 16 |
+            static_cast<std::uint32_t>(green) << 8 |
+            static_cast<std::uint32_t>(blue)
+        )
+    {}
     color() = default;
 
     std::uint32_t value;
@@ -46,7 +46,7 @@ constexpr color rgb(std::uint8_t r, std::uint8_t g, std::uint8_t b) noexcept
 {
     return color(r, g, b);
 }
-constexpr argb(std::uint8_t a, std::uint8_t r, std::uint8_t g, std::uint8_t b) noexcept
+constexpr color argb(std::uint8_t a, std::uint8_t r, std::uint8_t g, std::uint8_t b) noexcept
 {
     return color(r, g, b, a);
 }
