@@ -63,6 +63,7 @@ public:
         char line[33] = {};
         std::vector<vertex<vec3f, color>> vertexes;
         while (true) {
+            std::memset(line, 0, sizeof(line));
             s.read(line, 32);
             if (s.eof())
                 break;
