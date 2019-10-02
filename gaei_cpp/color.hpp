@@ -30,22 +30,22 @@ struct color {
 
     void a(std::uint8_t alpha) noexcept
     {
-        value &= (~0xFFul) << 24;
+        value &= ~(0xFFul << 24);
         value |= static_cast<std::uint32_t>(alpha) << 24;
     }
     void r(std::uint8_t red) noexcept
     {
-        value &= (~0xFFul) << 16;
+        value &= ~(0xFFul << 16);
         value |= static_cast<std::uint32_t>(red) << 16;
     }
     void g(std::uint8_t green) noexcept
     {
-        value &= (~0xFFul) << 8;
+        value &= ~(0xFFul << 8);
         value |= static_cast<std::uint32_t>(green) << 8;
     }
     void b(std::uint8_t blue) noexcept
     {
-        value &= (~0xFFul);
+        value &= ~0xFFul;
         value |= static_cast<std::uint32_t>(blue);
     }
 
