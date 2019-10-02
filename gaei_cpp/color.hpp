@@ -49,10 +49,12 @@ struct color {
         value |= static_cast<std::uint32_t>(blue);
     }
 
+    [[nodiscard]]
     friend bool operator==(color lhs, color rhs) noexcept
     {
         return lhs.value == rhs.value;
     }
+    [[nodiscard]]
     friend bool operator!=(color lhs, color rhs) noexcept
     {
         return !(lhs == rhs);
