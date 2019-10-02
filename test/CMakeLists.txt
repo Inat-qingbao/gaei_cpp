@@ -29,4 +29,5 @@ add_executable (
 	"test_main.cpp"
 	"test_vertex.cpp"
 	"test_dat_loader.cpp"
+	"test_color.cpp"
 )
