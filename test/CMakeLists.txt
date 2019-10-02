@@ -1,9 +1,7 @@
-﻿# CMakeList.txt : gaei_cpp の CMake プロジェクト。ソースを含めて、次を定義します:
-# プロジェクト専用ロジックはこちらです。
-#
-cmake_minimum_required (VERSION 3.8)
+﻿cmake_minimum_required (VERSION 3.8)
 
-enable_language(CXX)
+project ("gaei_cpp")
+
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON) 
 set(CMAKE_CXX_EXTENSIONS OFF) 
@@ -21,10 +19,15 @@ elseif(CMAKE_COMPILER_IS_GNUCC OR CMAKE_COMPILER_IS_GNUCXX)
   set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Wextra -Wno-long-long -pedantic")
 endif()
 
-include_directories("./thirdparty/ouchilib/include")
+include_directories("./ouchitest/include")
+include_directories("../gaei_cpp/thirdparty/ouchilib/include")
+include_directories("../gaei_cpp")
 
 # ソースをこのプロジェクトの実行可能ファイルに追加します。
-add_executable (gaei_cpp "gaei_cpp.cpp")
-
-# TODO: テストを追加し、必要な場合は、ターゲットをインストールします。
-
+add_executable (
+	gaei_test 
+	"test_main.cpp"
+	"test_vertex.cpp"
+	"test_dat_loader.cpp"
+	"test_color.cpp"
+)

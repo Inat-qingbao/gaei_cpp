@@ -1,3 +1,6 @@
 [submodule "gaei_cpp/thirdparty/ouchilib"]
 	path = gaei_cpp/thirdparty/ouchilib
 	url = https://github.com/ouchiminh/ouchilib.git
+[submodule "test/ouchitest"]
+	path = test/ouchitest
+	url = https://github.com/ouchiminh/ouchitest.git
