@@ -11,5 +11,4 @@ add_subdirectory ("gaei_cpp")
 add_subdirectory ("test")
 
 add_test (test01 "gaei_test")
-add_test (test01 "gaei_test")
 
