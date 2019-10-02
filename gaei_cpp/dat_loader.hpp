@@ -80,18 +80,18 @@ private:
     {
         using namespace std::string_view_literals;
         vec3f pos{};
-        std::string buffer; // to reduce memory allocation (MSVC's SSO is up to 8 byte)
+        std::string buffer; // to reduce memory allocation (MSVC's SSO is up to 15 byte)
         typename ouchi::translator_between<std::string, float>::type translator;
         unsigned vec_c = 0;
         constexpr color def_c = colors::white;
         while (line.size()) {
             auto [tk, it] = sep_(line);
-            if (tk == ouchi::tokenizer::primitive_token::word) {
-                if (auto value = translator.get_value(buffer.assign(line.substr(0, std::distance(line.begin(), it)))))
-                    pos.coord[vec_c++] = value.value();
-                else return ouchi::result::err("cannot translate string into float"sv);
-            }
-            line.remove_prefix(std::distance(line.begin(), it));
+            auto token = line.substr(0, std::distance(line.begin(), it));
+            line.remove_prefix(token.size());
+            if (tk != ouchi::tokenizer::primitive_token::word) continue;
+            if (auto value = translator.get_value(buffer.assign(token))) {
+                pos.coord[vec_c++] = value.value();
+            } else return ouchi::result::err("cannot translate string into float"sv);
         }
         if (vec_c < 3) return ouchi::result::err("too short line!"sv);
         return ouchi::result::ok(vertex<vec3f, color>{pos, def_c});
