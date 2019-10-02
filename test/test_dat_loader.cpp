@@ -13,6 +13,7 @@ OUCHI_TEST_CASE(test_dat_loader){
     OUCHI_CHECK_EQUAL(v.front().position.x(), 10.0);
     OUCHI_CHECK_EQUAL(v.front().position.y(), 11.0);
     OUCHI_CHECK_EQUAL(v.front().position.z(), 1.0);
+    OUCHI_CHECK_EQUAL(v.size(), 1);
 }
 
 OUCHI_TEST_CASE(test_dat_loader_vector_err)
