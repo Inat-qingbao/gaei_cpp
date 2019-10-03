@@ -40,8 +40,8 @@ gaei::vector<T, 3> cross_product(const gaei::vector<T, 3>& a,
     noexcept
 {	
 	gaei::vector<T, 3> c;
-	c.coord[0] = a.coord[1] * b.coord[2] - a.coord[2] - b.coord[1];
-	c.coord[1] = a.coord[2] * b.coord[0] - a.coord[0] - b.coord[2];
+	c.coord[0] = a.coord[1] * b.coord[2] - a.coord[2] * b.coord[1];
+	c.coord[1] = a.coord[2] * b.coord[0] - a.coord[0] * b.coord[2];
 	c.coord[2] = a.coord[0] * b.coord[1] - a.coord[1] * b.coord[0];
 	return c;
 }
