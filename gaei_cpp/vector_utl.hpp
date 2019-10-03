@@ -1,26 +1,26 @@
-#pragma once
+ï»¿#pragma once
 #include <cmath>
 #include <type_traits>
 #include "vertex.hpp"
 
 namespace gaei{
 
-// ƒxƒNƒgƒ‹a‚Æb‚Ì‹——£‚ğ‹‚ß‚é
-// T = ƒxƒNƒgƒ‹‚ÌŠe—v‘f‚ÌŒ^(float‚Æ‚©double‚Æ‚©int‚Æ‚©)
-// Dim = ƒxƒNƒgƒ‹‚ÌŸŒ³
+// ãƒ™ã‚¯ãƒˆãƒ«aã¨bã®è·é›¢ã‚’æ±‚ã‚ã‚‹
+// T = ãƒ™ã‚¯ãƒˆãƒ«ã®å„è¦ç´ ã®å‹(floatã¨ã‹doubleã¨ã‹intã¨ã‹)
+// Dim = ãƒ™ã‚¯ãƒˆãƒ«ã®æ¬¡å…ƒ
 template<class T, size_t Dim>
-T distance(const gaei::vector<T, Dim>& a,
-	       const gaei::vector<T, Dim>& b)
+T distance(const vector<T, Dim>& a,
+	       const vector<T, Dim>& b)
     noexcept
 {
 	T sum{};
     for(auto i = 0u; i < Dim; ++i) {
 		sum += std::pow(a.coord[i] - b.coord[i], 2);
     }
-	return T{ std::sqrt(sum) };
+	return static_cast<T>(std::sqrt(sum));
 }
 
-// ƒxƒNƒgƒ‹a‚Æb‚Ì“àÏ
+// ãƒ™ã‚¯ãƒˆãƒ«aã¨bã®å†…ç©
 template<class T, size_t Dim>
 T inner_product(const gaei::vector<T, Dim>& a,
 	            const gaei::vector<T, Dim>& b)
@@ -33,7 +33,7 @@ T inner_product(const gaei::vector<T, Dim>& a,
 	return res;
 }
 
-// 3ŸŒ³ƒxƒNƒgƒ‹a‚Æb‚ÌŠOÏ
+// 3æ¬¡å…ƒãƒ™ã‚¯ãƒˆãƒ«aã¨bã®å¤–ç©
 template<class T>
 gaei::vector<T, 3> cross_product(const gaei::vector<T, 3>& a,
                                  const gaei::vector<T, 3>& b)

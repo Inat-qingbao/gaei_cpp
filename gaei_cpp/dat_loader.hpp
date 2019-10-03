@@ -18,7 +18,7 @@ class dat_loader {
     static ouchi::tokenizer::separator<char> init_sep()
     {
         using namespace std::literals;
-        return ouchi::tokenizer::separator<char>(std::in_place, { " "s, "\r\n" });
+        return ouchi::tokenizer::separator<char>(std::in_place, { " "s, "\r\n"s });
     }
 
 public:

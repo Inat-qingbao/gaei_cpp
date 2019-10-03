@@ -1,4 +1,4 @@
-#include "ouchitest.hpp"
+ï»¿#include "ouchitest.hpp"
 #include "vector_utl.hpp"
 
 OUCHI_TEST_CASE(test_distance)
@@ -7,7 +7,7 @@ OUCHI_TEST_CASE(test_distance)
 		gaei::vector<int, 2> a{ 0, 0 };
 		gaei::vector<int, 2> b{ 3, 0 };
 
-        // distance(a, b) ‚ª 3‚Æ“™‚µ‚¢‚©’²‚×‚éB
+        // distance(a, b) ãŒ 3ã¨ç­‰ã—ã„ã‹èª¿ã¹ã‚‹ã€‚
 		OUCHI_CHECK_EQUAL(gaei::distance(a, b), 3);
 	}
 	{
@@ -18,14 +18,14 @@ OUCHI_TEST_CASE(test_distance)
     }
 }
 
-// ƒeƒXƒgƒP[ƒX‚ğ’è‹`‚·‚é
+// ãƒ†ã‚¹ãƒˆã‚±ãƒ¼ã‚¹ã‚’å®šç¾©ã™ã‚‹
 OUCHI_TEST_CASE(test_innser_product)
 {
 	{
 		gaei::vector<int, 2> a{ 3,4 };
 		gaei::vector<int, 2> b{ 6,-5 };
 
-		//inner_product(a,b)‚ª-2‚Æ“™‚µ‚¢‚©’²‚×‚éB
+		//inner_product(a,b)ãŒ-2ã¨ç­‰ã—ã„ã‹èª¿ã¹ã‚‹ã€‚
 		OUCHI_CHECK_EQUAL(gaei::inner_product(a, b), -2);
 	}
 	{

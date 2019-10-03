@@ -8,8 +8,9 @@ namespace gaei {
 /// 点を表現します。
 /// </summary>
 /// <typeparam name="T">点の各次元の型</typeparam>
-template<class T, std::size_t Dim, std::enable_if_t<std::is_arithmetic_v<T>>* = nullptr>
+template<class T, std::size_t Dim>
 struct vector {
+    static_assert(std::is_arithmetic_v<T>);
     /// <summary>
     /// 点の各次元の座標を格納します。
     /// </summary>
