@@ -15,7 +15,7 @@ T distance(const vector<T, Dim>& a,
 {
 	T sum{};
     for(auto i = 0u; i < Dim; ++i) {
-		sum += std::pow(a.coord[i] - b.coord[i], 2);
+		sum += static_cast<T>(std::pow(a.coord[i] - b.coord[i], 2));
     }
 	return static_cast<T>(std::sqrt(sum));
 }
