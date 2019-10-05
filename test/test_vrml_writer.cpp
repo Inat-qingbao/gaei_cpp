@@ -10,7 +10,7 @@ constexpr std::string_view correct_indexed_face_set =
 "1 1 1\n"
 "]\n"
 "}\n"
-"color{color[1 1 1\n"
+"color Color{color[1 1 1\n"
 "1 1 1\n"
 "]}}\n";
 

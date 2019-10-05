@@ -75,7 +75,7 @@ public:
     const auto& data() const noexcept { return vertexes_; }
 private:
     bool write_color(std::ostream& out) const {
-		out << "color{color[";
+		out << "color Color{color[";
         for(auto&& v : vertexes_){
 			out << static_cast<float>(v.color.r() / 255.0) << ' ';
 			out << static_cast<float>(v.color.g() / 255.0) << ' ';
