@@ -50,6 +50,10 @@ public:
 	virtual ~shape() = default;
 	shape() = default;
     
+    Geometry& geometry() noexcept { return geometry_; }
+    const Geometry& geometry() const noexcept { return geometry_; }
+    Appearance& appearance() noexcept { return appearance_; }
+    const Appearance& appearance() const noexcept { return appearance_; }
 protected:
     virtual bool write_geometry(std::ostream& out) const override {
 		bool ret = true;
