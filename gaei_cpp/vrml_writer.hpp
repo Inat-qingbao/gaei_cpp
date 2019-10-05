@@ -10,7 +10,7 @@ namespace gaei::vrml {
 class header {
 public:
     // これを出力関数の共通インターフェースとしよう
-	bool write()(std::ostream& out) {
+	bool write(std::ostream& out) {
 		out << "#VRML V2.0 utf8\n";
 		return true;
 	}
@@ -30,8 +30,8 @@ public:
     virtual bool write(std::ostream& out) const {
 		bool ret = true;
 		out << "Shape{";
-		ret &&= write_geometry(out);
-		ret &&= write_appearance(out);
+		ret &= write_geometry(out);
+		ret &= write_appearance(out);
 		out << "}\n";
 		return ret;
 	}
@@ -69,7 +69,7 @@ public:
 		write_color(out);
 		//coord_index add later
 		out << "}\n";
-		return true;
+		return (bool)out;
 	}
     auto& data() noexcept { return vertexes_; }
     const auto& data() const noexcept { return vertexes_; }
@@ -83,7 +83,7 @@ private:
 			out << '\n';
         }
 		out << "]}";
-		return out;
+		return (bool)out;
     }
 	bool write_coord(std::ostream& out) const {
 		out << "coord Coordinate{";
@@ -93,7 +93,7 @@ private:
 		}
 		out << "]\n";
 		out << "}\n";
-		return out;
+		return (bool)out;
 	}
 };
 

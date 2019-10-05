@@ -14,7 +14,7 @@ constexpr std::string_view correct_indexed_face_set =
 gaei::vertex<gaei::vec3f, gaei::color> vs[] = {
     {{0,0,0}, {1,1,1}},
     {{1,1,1}, {1,1,1}}
-}
+};
 
 }
 
