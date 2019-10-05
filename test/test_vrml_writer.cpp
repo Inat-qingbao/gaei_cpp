@@ -8,12 +8,15 @@ namespace {
 constexpr std::string_view correct_indexed_face_set =
 "geometry IndexedFaceSet{coord Coordinate{point[0 0 0\n"
 "1 1 1\n"
-"]}color{color[1 1 1\n"
-"1 1 1]}}\n";
+"]\n"
+"}\n"
+"color{color[1 1 1\n"
+"1 1 1\n"
+"]}}\n";
 
 gaei::vertex<gaei::vec3f, gaei::color> vs[] = {
-    {{0,0,0}, {1,1,1}},
-    {{1,1,1}, {1,1,1}}
+    {{0,0,0}, {255,255,255}},
+    {{1,1,1}, {255,255,255}}
 };
 
 }

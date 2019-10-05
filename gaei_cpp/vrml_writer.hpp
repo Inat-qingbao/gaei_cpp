@@ -79,7 +79,7 @@ private:
         for(auto&& v : vertexes_){
 			out << static_cast<float>(v.color.r() / 255.0) << ' ';
 			out << static_cast<float>(v.color.g() / 255.0) << ' ';
-			out << static_cast<float>(v.color.b() / 255.0) << ' ';
+			out << static_cast<float>(v.color.b() / 255.0);
 			out << '\n';
         }
 		out << "]}";
