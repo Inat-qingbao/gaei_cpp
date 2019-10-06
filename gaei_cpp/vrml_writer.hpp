@@ -1,4 +1,4 @@
-#pragma once
+ï»¿#pragma once
 #include <iostream>
 #include <vector>
 #include <list>
@@ -73,7 +73,7 @@ public:
 	virtual ~shape_base() = default;
 	shape_base() = default;
 
-    // ŠO(å‚Évrml_writer)‚©‚çŒÄ‚Ño‚³‚ê‚Äshapeƒm[ƒh‚ğo—Í‚·‚éŠÖ”
+    // å¤–(ä¸»ã«vrml_writer)ã‹ã‚‰å‘¼ã³å‡ºã•ã‚Œã¦shapeãƒãƒ¼ãƒ‰ã‚’å‡ºåŠ›ã™ã‚‹é–¢æ•°
     virtual bool write(std::ostream& out) const override {
 		bool ret = true;
 		out << "Shape{";
@@ -83,9 +83,9 @@ public:
 		return ret;
 	}
 protected:
-    // Œp³æ‚Ì‹ï‘Ì“I‚È`shape`‚©‚çŒÄ‚Ño‚³‚ê‚ÄGeometryƒm[ƒh(IndexedFaceSet‚âBox‚È‚Ç)‚ğ‘‚«‚Şƒˆ‰¼‘zŠÖ”
+    // ç¶™æ‰¿å…ˆã®å…·ä½“çš„ãª`shape`ã‹ã‚‰å‘¼ã³å‡ºã•ã‚Œã¦Geometryãƒãƒ¼ãƒ‰(IndexedFaceSetã‚„Boxãªã©)ã‚’æ›¸ãè¾¼ã‚€ç´”ç²‹ä»®æƒ³é–¢æ•°
 	virtual bool write_geometry(std::ostream& out) const = 0;
-    // Œp³æ‚Ì‹ï‘Ì“I‚È`shape`‚©‚çŒÄ‚Ño‚³‚ê‚ÄAppearanceƒm[ƒh‚ğ‘‚«‚Şƒˆ‰¼‘zŠÖ”
+    // ç¶™æ‰¿å…ˆã®å…·ä½“çš„ãª`shape`ã‹ã‚‰å‘¼ã³å‡ºã•ã‚Œã¦Appearanceãƒãƒ¼ãƒ‰ã‚’æ›¸ãè¾¼ã‚€ç´”ç²‹ä»®æƒ³é–¢æ•°
 	virtual bool write_appearance(std::ostream& out) const = 0;
 };
 
@@ -102,10 +102,15 @@ public:
     Appearance& appearance() noexcept { return appearance_; }
     const Appearance& appearance() const noexcept { return appearance_; }
 protected:
-    virtual bool write_geometry(std::ostream& out) const override {
-		bool ret = true;
-        ret &&= geometry_.write(out);
-        ret &&= appearance_.write(out);
+    virtual bool write_geometry(std::ostream& out) const override
+    {
+        geometry_.write(out);
+        return (bool)out
+    }
+    virtual bool write_appearance(std::ostream& out) const override
+    {
+        appearance_.write(out);
+        return (bool)out;
     }
 };
 
@@ -179,8 +184,8 @@ struct appearance {
     }
 };
 
-// ‚±‚¢‚Â‚Ívertex‚Ìvector‚ğ•Û‚·‚é‚×‚«B
-// ‚È‚Ì‚Åvertex‚Ìvector‚ğó‚¯æ‚éŠÖ”‚ª•K—vB
+// ã“ã„ã¤ã¯vertexã®vectorã‚’ä¿æŒã™ã‚‹ã¹ãã€‚
+// ãªã®ã§vertexã®vectorã‚’å—ã‘å–ã‚‹é–¢æ•°ãŒå¿…è¦ã€‚
 class indexed_face_set {
 	std::vector<gaei::vertex<gaei::vec3f, gaei::color>> vertexes_;
 public:
