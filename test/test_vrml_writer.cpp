@@ -35,4 +35,5 @@ OUCHI_TEST_CASE(test_vrml_writer)
     gaei::vrml::shape<gaei::vrml::box, gaei::vrml::appearance<>> box;
     vw.push(box);
     vw.write(".\\box.wrl");
+    // テストを書くのが非常にしんどいので表示して確認してくれ！！！！
 }
