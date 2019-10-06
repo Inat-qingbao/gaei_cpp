@@ -1,7 +1,8 @@
 #pragma once
-#include<iostream>
-#include<vector>
-#include<fstream>
+#include <iostream>
+#include <vector>
+#include <list>
+#include <fstream>
 #include <memory>
 #include <filesystem>
 
@@ -226,6 +227,52 @@ class box {
             << size.y() << ' '
             << size.z() << '\n';
         out << "}\n";
+        return (bool)out;
+    }
+};
+
+struct transform : public node_base {
+    vec3f translation = { 0, 0, 0 };
+    vector<float, 4> rotation = {1, 0, 0, 0};
+    vec3f scale = {1, 1, 1};
+    vector<float, 4> scale_orientation = { 0,0,1,0 };
+    vec3f bbox_center = { 0,0,0 };
+    vec3f bbox_size = {-1, -1, -1};
+    std::list<std::unique_ptr<node_base>> children;
+    bool write(std::ostream& out) const override
+    {
+        out << "Transform {\n";
+        out << "translation "
+            << translation.x() << ' '
+            << translation.y() << ' '
+            << translation.z() << '\n';
+        out << "rotation "
+            << translation.x() << ' '
+            << translation.y() << ' '
+            << translation.z() << ' '
+            << translation.coord[3] << '\n';
+        out << "scale "
+            << scale.x() << ' '
+            << scale.y() << ' '
+            << scale.z() << '\n';
+        out << "scaleOrientation "
+            << translation.x() << ' '
+            << translation.y() << ' '
+            << translation.z() << ' '
+            << translation.coord[3] << '\n';
+        out << "bboxCenter "
+            << bbox_center.x() << ' '
+            << bbox_center.y() << ' '
+            << bbox_center.z() << '\n';
+        out << "bboxSize "
+            << bbox_size.x() << ' '
+            << bbox_size.y() << ' '
+            << bbox_size.z() << '\n';
+        out << "children [\n";
+        for (const auto& i : children) {
+            i->write(out);
+        }
+        out << "]\n}\n";
         return (bool)out;
     }
 };
