@@ -145,10 +145,10 @@ struct material {
 };
 
 struct texture_transform {
-    vec2f center;
-    float rotation;
-    vec2f scale;
-    vec2f translation;
+    vec2f center = {0, 0};
+    float rotation = 0;
+    vec2f scale = { 1, 1 };
+    vec2f translation = { 0, 0 };
     bool write([[maybe_unused]] std::ostream& out) const
     {
         return false;
@@ -158,8 +158,8 @@ struct texture_transform {
 template<class Texture = std::nullptr_t>
 struct appearance {
     material mate;
-    Texture texture;
-    texture_transform transform;
+    Texture texture = Texture{};
+    texture_transform transform = texture_transform{};
     template<
         class T = Texture,
         std::enable_if_t<detail::has_member_write_v<T>>* = nullptr>
@@ -224,7 +224,7 @@ private:
 };
 
 struct box {
-    vec3f size = { 1, 1, 1 };
+    vec3f size = { 2,2,2 };
     bool write(std::ostream& out) const
     {
         out << "geometry Box { \n";
