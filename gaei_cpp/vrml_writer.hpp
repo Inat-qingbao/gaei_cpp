@@ -2,32 +2,78 @@
 #include<iostream>
 #include<vector>
 #include<fstream>
+#include <memory>
+#include <filesystem>
 
 #include"color.hpp"
 #include"vertex.hpp"
 
 namespace gaei::vrml {
-class header {
-public:
-    // これを出力関数の共通インターフェースとしよう
-	bool write(std::ostream& out) {
-		out << "#VRML V2.0 utf8\n";
-		return true;
-	}
+
+namespace detail {
+
+#define GAEI_HAS_MEMBER(member_name)\
+template<class T, class = void>\
+struct has_member_ ## member_name : std::false_type {};\
+\
+template<class T>\
+struct has_member_ ## member_name<T, std::void_t<decltype(&(T:: ## member_name))>> : std::true_type {};\
+template<class T>\
+inline constexpr bool has_member_ ## member_name ## _v = has_member_ ## member_name <T>::value;
+
+GAEI_HAS_MEMBER(write);
+
+}
+
+struct node_base {
+    virtual ~node_base() = default;
+    virtual bool write(std::ostream& out) const = 0;
 };
 
 class vrml_writer {
+    std::list<std::unique_ptr<node_base>> nodes_;
+public:
 
+    template<class Node>
+    void push(Node&& node)
+    {
+        nodes_.push_back(std::make_unique<std::remove_reference_t<Node>>(std::forward<Node>(node)));
+    }
+    template<class Node, class ...Args>
+    void push(Args&& ...args)
+    {
+        nodes_.push_back(std::make_unique<Node>(std::forward<Args>(args)...));
+    }
+    auto& data() noexcept { return nodes_; }
+    const auto& data() const noexcept { return nodes_; }
+
+    bool write(std::ostream& out) const noexcept
+    {
+        write_headder(out);
+        for (auto& i : nodes_) i->write(out);
+        return (bool)out;
+    }
+    bool write(const std::filesystem::path& path) const noexcept
+    {
+        std::ofstream out(path);
+        return write(out);
+    }
+private:
+    bool write_headder(std::ostream& out) const
+    {
+		out << "#VRML V2.0 utf8\n";
+		return (bool)out;
+    }
 };
 
-class shape_base {
+class shape_base : public node_base {
 public:
     // for safe destruction, the destructor should be virtual;
 	virtual ~shape_base() = default;
 	shape_base() = default;
 
     // 外(主にvrml_writer)から呼び出されてshapeノードを出力する関数
-    virtual bool write(std::ostream& out) const {
+    virtual bool write(std::ostream& out) const override {
 		bool ret = true;
 		out << "Shape{";
 		ret &= write_geometry(out);
@@ -59,6 +105,76 @@ protected:
 		bool ret = true;
         ret &&= geometry_.write(out);
         ret &&= appearance_.write(out);
+    }
+};
+
+struct material {
+    float ambient_intensity;
+    color diffuse_color;
+    color specular_color;
+    float shininess;
+    color emissive_color;
+    float transparency = 0;
+    bool write(std::ostream& out) const
+    {
+        out << "Material {";
+        out << "ambientIntensity " << ambient_intensity << '\n';
+        out << "diffuseColor " << static_cast<float>(diffuse_color.r() / 255.0) << ' '
+            << static_cast<float>(diffuse_color.g() / 255.0) << ' '
+            << static_cast<float>(diffuse_color.b() / 255.0) << '\n';
+
+        out << "specularColor " << static_cast<float>(specular_color.r() / 255.0) << ' '
+            << static_cast<float>(specular_color.g() / 255.0) << ' '
+            << static_cast<float>(specular_color.b() / 255.0) << '\n';
+
+        out << "emissiveColor " << static_cast<float>(emissive_color.r() / 255.0) << ' '
+            << static_cast<float>(emissive_color.g() / 255.0) << ' '
+            << static_cast<float>(emissive_color.b() / 255.0) << '\n';
+
+        out << "shininess " << shininess << '\n';
+        out << "transparency " << shininess << '\n';
+        out << "}\n";
+        return (bool)out;
+    }
+};
+
+struct texture_transform {
+    vec2f center;
+    float rotation;
+    vec2f scale;
+    vec2f translation;
+    bool write(std::ostream& out) const
+    {
+        return false;
+    }
+};
+
+template<class Texture = std::nullptr_t>
+struct appearance {
+    material mate;
+    Texture texture;
+    texture_transform transform;
+    template<
+        class T = Texture,
+        std::enable_if_t<detail::has_member_write_v<T>>* = nullptr>
+    bool write(std::ostream& out) const
+    {
+        out << "appearance Appearance {\n";
+        out.write(out);
+        texture.write(out);
+        transform.write(out);
+        out << "}\n";
+        return (bool)out
+    }
+    template<
+        class T = Texture,
+        std::enable_if_t<! detail::has_member_write_v<T>>* = nullptr>
+    bool write(std::ostream& out) const
+    {
+        out << "appearance Appearance {\n";
+        out.write(out);
+        out << "}\n";
+        return (bool)out
     }
 };
 
@@ -99,6 +215,19 @@ private:
 		out << "}\n";
 		return (bool)out;
 	}
+};
+
+class box {
+    vec3f size;
+    bool write(std::ostream& out) const
+    {
+        out << "Box { \n";
+        out << "size " << size.x() << ' '
+            << size.y() << ' '
+            << size.z() << '\n';
+        out << "}\n";
+        return (bool)out;
+    }
 };
 
 }
