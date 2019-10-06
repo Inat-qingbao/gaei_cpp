@@ -105,7 +105,7 @@ protected:
     virtual bool write_geometry(std::ostream& out) const override
     {
         geometry_.write(out);
-        return (bool)out
+        return (bool)out;
     }
     virtual bool write_appearance(std::ostream& out) const override
     {
@@ -115,15 +115,15 @@ protected:
 };
 
 struct material {
-    float ambient_intensity;
-    color diffuse_color;
-    color specular_color;
-    float shininess;
-    color emissive_color;
+    float ambient_intensity = 0.2f;
+    color diffuse_color = color{204, 204, 204};
+    color specular_color = color{ 0, 0, 0 };
+    float shininess = 0.2f;
+    color emissive_color = color{ 0, 0, 0 };
     float transparency = 0;
     bool write(std::ostream& out) const
     {
-        out << "Material {";
+        out << "material Material {";
         out << "ambientIntensity " << ambient_intensity << '\n';
         out << "diffuseColor " << static_cast<float>(diffuse_color.r() / 255.0) << ' '
             << static_cast<float>(diffuse_color.g() / 255.0) << ' '
@@ -149,7 +149,7 @@ struct texture_transform {
     float rotation;
     vec2f scale;
     vec2f translation;
-    bool write(std::ostream& out) const
+    bool write([[maybe_unused]] std::ostream& out) const
     {
         return false;
     }
@@ -166,11 +166,11 @@ struct appearance {
     bool write(std::ostream& out) const
     {
         out << "appearance Appearance {\n";
-        out.write(out);
+        mate.write(out);
         texture.write(out);
         transform.write(out);
         out << "}\n";
-        return (bool)out
+        return (bool)out;
     }
     template<
         class T = Texture,
@@ -178,9 +178,9 @@ struct appearance {
     bool write(std::ostream& out) const
     {
         out << "appearance Appearance {\n";
-        out.write(out);
+        mate.write(out);
         out << "}\n";
-        return (bool)out
+        return (bool)out;
     }
 };
 
@@ -223,11 +223,11 @@ private:
 	}
 };
 
-class box {
-    vec3f size;
+struct box {
+    vec3f size = { 1, 1, 1 };
     bool write(std::ostream& out) const
     {
-        out << "Box { \n";
+        out << "geometry Box { \n";
         out << "size " << size.x() << ' '
             << size.y() << ' '
             << size.z() << '\n';
@@ -252,19 +252,19 @@ struct transform : public node_base {
             << translation.y() << ' '
             << translation.z() << '\n';
         out << "rotation "
-            << translation.x() << ' '
-            << translation.y() << ' '
-            << translation.z() << ' '
-            << translation.coord[3] << '\n';
+            << rotation.x() << ' '
+            << rotation.y() << ' '
+            << rotation.z() << ' '
+            << rotation.coord[3] << '\n';
         out << "scale "
             << scale.x() << ' '
             << scale.y() << ' '
             << scale.z() << '\n';
         out << "scaleOrientation "
-            << translation.x() << ' '
-            << translation.y() << ' '
-            << translation.z() << ' '
-            << translation.coord[3] << '\n';
+            << scale_orientation.x() << ' '
+            << scale_orientation.y() << ' '
+            << scale_orientation.z() << ' '
+            << scale_orientation.coord[3] << '\n';
         out << "bboxCenter "
             << bbox_center.x() << ' '
             << bbox_center.y() << ' '

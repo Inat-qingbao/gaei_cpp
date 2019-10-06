@@ -1,4 +1,4 @@
-#include <sstream>
+﻿#include <sstream>
 #include <string_view>
 #include "ouchitest.hpp"
 #include "vrml_writer.hpp"
@@ -27,4 +27,12 @@ OUCHI_TEST_CASE(test_indexed_face_set){
     faceset.data().assign(std::begin(vs), std::end(vs));
     faceset.write(ss);
     OUCHI_CHECK_EQUAL(ss.str(), correct_indexed_face_set);
+}
+
+OUCHI_TEST_CASE(test_vrml_writer)
+{
+    gaei::vrml::vrml_writer vw;
+    gaei::vrml::shape<gaei::vrml::box, gaei::vrml::appearance<>> box;
+    vw.push(box);
+    vw.write(".\\box.wrl");
 }
