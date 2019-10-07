@@ -91,11 +91,15 @@ int main(int argc, const char** const argv)
         std::cout << d << std::endl;
         return -1;
     }    
-    if (auto r = load(in); !r) {
+    auto r = load(in);
+    if (!r) {
         std::cout << r.unwrap_err() << std::endl;
+        for (auto i : r.unwrap_err())
+            std::cout << std::hex << (int)i << ' ';
         return -1;
     }
     auto out_path = p.get<std::string>("out");
-
+    std::cout << "out:" << out_path << std::endl;
+    write(r.unwrap(), out_path);
 	return 0;
 }
