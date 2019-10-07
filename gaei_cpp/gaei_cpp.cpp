@@ -6,6 +6,7 @@
 #include <string>
 #include <string_view>
 #include <filesystem>
+#include <memory>
 #include "vertex.hpp"
 #include "color.hpp"
 #include "dat_loader.hpp"
@@ -26,7 +27,7 @@ load(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& buf,
     // path is directory
     if (d) {
         for (auto&& subp : std::filesystem::directory_iterator(p)) {
-            load(buf, subp.path);
+            if(auto r = load(buf, subp.path()); !r) return ouchi::result::err(r.unwrap_err());
         }
     }
     // path is file
@@ -51,16 +52,26 @@ load(const std::vector<std::string>& path)
         std::filesystem::path fp{ p };
         if (auto r = load(ret, fp); !r) return ouchi::result::err(r.unwrap_err());
     }
+    return ouchi::result::ok(std::move(ret));
 }
 
 bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
            std::string path)
 {
+    namespace vrml = gaei::vrml;
     std::ofstream of{ path };
-    gaei::vrml::vrml_writer vw;
+    vrml::vrml_writer vw;
 
     for (auto&& v : vs) {
+        vrml::transform t;
+        using box_shape = vrml::shape<gaei::vrml::box, vrml::appearance<>>;
+        box_shape box;
+        t.translation = gaei::vec3f{ v.position.x(), v.position.y(), 0 };
+        box.geometry().size = gaei::vec3f{ 1, 1, v.position.z() };
+        t.children.push_back(std::make_unique<box_shape>(box));
+        vw.push(std::move(t));
     }
+    return vw.write(path);
 }
 
 int main(int argc, const char** const argv)
@@ -79,9 +90,11 @@ int main(int argc, const char** const argv)
         std::cout << "少なくとも一つ以上のファイルまたはディレクトリが入力されていなければなりません\n";
         return -1;
     }    
-    load(p.get<std::vector<std::string>>(""));
+    if (auto r = load(p.get<std::vector<std::string>>("")); !r) {
+        std::cout << r.unwrap_err() << std::endl;
+        return -1;
+    }
     auto out_path = p.get<std::string>("out");
-
 
 	return 0;
 }
