@@ -85,12 +85,13 @@ int main(int argc, const char** const argv)
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
-    
-    if (!p.exist("")) {
+    auto in = p.get<std::vector<std::string>>("");
+    if (in.size() == 0) {
         std::cout << "少なくとも一つ以上のファイルまたはディレクトリが入力されていなければなりません\n";
+        std::cout << d << std::endl;
         return -1;
     }    
-    if (auto r = load(p.get<std::vector<std::string>>("")); !r) {
+    if (auto r = load(in); !r) {
         std::cout << r.unwrap_err() << std::endl;
         return -1;
     }
