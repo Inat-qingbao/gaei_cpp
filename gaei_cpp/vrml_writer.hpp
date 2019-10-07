@@ -62,41 +62,41 @@ public:
 private:
     bool write_headder(std::ostream& out) const
     {
-		out << "#VRML V2.0 utf8\n";
-		return (bool)out;
+        out << "#VRML V2.0 utf8\n";
+        return (bool)out;
     }
 };
 
 class shape_base : public node_base {
 public:
     // for safe destruction, the destructor should be virtual;
-	virtual ~shape_base() = default;
-	shape_base() = default;
+    virtual ~shape_base() = default;
+    shape_base() = default;
 
     // 外(主にvrml_writer)から呼び出されてshapeノードを出力する関数
-    virtual bool write(std::ostream& out) const override {
-		bool ret = true;
-		out << "Shape{";
-		ret &= write_geometry(out);
-		ret &= write_appearance(out);
-		out << "}\n";
-		return ret;
-	}
+    virtual bool write(std::ostream& out) const override
+    {
+        out << "Shape{";
+        write_geometry(out);
+        write_appearance(out);
+        out << "}\n";
+        return (bool)out;
+    }
 protected:
     // 継承先の具体的な`shape`から呼び出されてGeometryノード(IndexedFaceSetやBoxなど)を書き込む純粋仮想関数
-	virtual bool write_geometry(std::ostream& out) const = 0;
+    virtual bool write_geometry(std::ostream& out) const = 0;
     // 継承先の具体的な`shape`から呼び出されてAppearanceノードを書き込む純粋仮想関数
-	virtual bool write_appearance(std::ostream& out) const = 0;
+    virtual bool write_appearance(std::ostream& out) const = 0;
 };
 
 template<class Geometry, class Appearance>
 class shape : public shape_base {
-	Geometry geometry_;
-	Appearance appearance_;
+    Geometry geometry_;
+    Appearance appearance_;
 public:
-	virtual ~shape() = default;
-	shape() = default;
-    
+    virtual ~shape() = default;
+    shape() = default;
+
     Geometry& geometry() noexcept { return geometry_; }
     const Geometry& geometry() const noexcept { return geometry_; }
     Appearance& appearance() noexcept { return appearance_; }
@@ -116,7 +116,7 @@ protected:
 
 struct material {
     float ambient_intensity = 0.2f;
-    color diffuse_color = color{204, 204, 204};
+    color diffuse_color = color{ 204, 204, 204 };
     color specular_color = color{ 0, 0, 0 };
     float shininess = 0.2f;
     color emissive_color = color{ 0, 0, 0 };
@@ -145,7 +145,7 @@ struct material {
 };
 
 struct texture_transform {
-    vec2f center = {0, 0};
+    vec2f center = { 0, 0 };
     float rotation = 0;
     vec2f scale = { 1, 1 };
     vec2f translation = { 0, 0 };
@@ -163,7 +163,7 @@ struct appearance {
     template<
         class T = Texture,
         std::enable_if_t<detail::has_member_write_v<T>>* = nullptr>
-    bool write(std::ostream& out) const
+        bool write(std::ostream& out) const
     {
         out << "appearance Appearance {\n";
         mate.write(out);
@@ -175,7 +175,7 @@ struct appearance {
     template<
         class T = Texture,
         std::enable_if_t<! detail::has_member_write_v<T>>* = nullptr>
-    bool write(std::ostream& out) const
+        bool write(std::ostream& out) const
     {
         out << "appearance Appearance {\n";
         mate.write(out);
@@ -187,40 +187,43 @@ struct appearance {
 // こいつはvertexのvectorを保持するべき。
 // なのでvertexのvectorを受け取る関数が必要。
 class indexed_face_set {
-	std::vector<gaei::vertex<gaei::vec3f, gaei::color>> vertexes_;
+    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> vertexes_;
 public:
-	bool write(std::ostream& out) const {
-		out << "geometry IndexedFaceSet{";
-		write_coord(out);
-		write_color(out);
-		//coord_index add later
-		out << "}\n";
-		return (bool)out;
-	}
+    bool write(std::ostream& out) const
+    {
+        out << "geometry IndexedFaceSet{";
+        write_coord(out);
+        write_color(out);
+        //coord_index add later
+        out << "}\n";
+        return (bool)out;
+    }
     auto& data() noexcept { return vertexes_; }
     const auto& data() const noexcept { return vertexes_; }
 private:
-    bool write_color(std::ostream& out) const {
-		out << "color Color{color[";
-        for(auto&& v : vertexes_){
-			out << static_cast<float>(v.color.r() / 255.0) << ' ';
-			out << static_cast<float>(v.color.g() / 255.0) << ' ';
-			out << static_cast<float>(v.color.b() / 255.0);
-			out << '\n';
+    bool write_color(std::ostream& out) const
+    {
+        out << "color Color{color[";
+        for (auto&& v : vertexes_) {
+            out << static_cast<float>(v.color.r() / 255.0) << ' ';
+            out << static_cast<float>(v.color.g() / 255.0) << ' ';
+            out << static_cast<float>(v.color.b() / 255.0);
+            out << '\n';
         }
-		out << "]}";
-		return (bool)out;
+        out << "]}";
+        return (bool)out;
     }
-	bool write_coord(std::ostream& out) const {
-		out << "coord Coordinate{";
-		out << "point[";
-		for (const auto& v : vertexes_) {
-			out << v.position.x() << " " << v.position.y() << " " << v.position.z() << '\n';
-		}
-		out << "]\n";
-		out << "}\n";
-		return (bool)out;
-	}
+    bool write_coord(std::ostream& out) const
+    {
+        out << "coord Coordinate{";
+        out << "point[";
+        for (const auto& v : vertexes_) {
+            out << v.position.x() << " " << v.position.y() << " " << v.position.z() << '\n';
+        }
+        out << "]\n";
+        out << "}\n";
+        return (bool)out;
+    }
 };
 
 struct box {
@@ -238,11 +241,11 @@ struct box {
 
 struct transform : public node_base {
     vec3f translation = { 0, 0, 0 };
-    vector<float, 4> rotation = {1, 0, 0, 0};
-    vec3f scale = {1, 1, 1};
+    vector<float, 4> rotation = { 1, 0, 0, 0 };
+    vec3f scale = { 1, 1, 1 };
     vector<float, 4> scale_orientation = { 0,0,1,0 };
     vec3f bbox_center = { 0,0,0 };
-    vec3f bbox_size = {-1, -1, -1};
+    vec3f bbox_size = { -1, -1, -1 };
     std::list<std::unique_ptr<node_base>> children;
     bool write(std::ostream& out) const override
     {

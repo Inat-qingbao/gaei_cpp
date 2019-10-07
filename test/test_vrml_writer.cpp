@@ -21,8 +21,9 @@ gaei::vertex<gaei::vec3f, gaei::color> vs[] = {
 
 }
 
-OUCHI_TEST_CASE(test_indexed_face_set){
-	std::stringstream ss;
+OUCHI_TEST_CASE(test_indexed_face_set)
+{
+    std::stringstream ss;
     gaei::vrml::indexed_face_set faceset;
     faceset.data().assign(std::begin(vs), std::end(vs));
     faceset.write(ss);

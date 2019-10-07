@@ -2,7 +2,8 @@
 #include "ouchitest.hpp"
 #include "dat_loader.hpp"
 
-OUCHI_TEST_CASE(test_dat_loader){
+OUCHI_TEST_CASE(test_dat_loader)
+{
     using namespace std::literals;
     // ダミーの.datを模した正常なデータを用意
     std::stringstream s("      10.0       11.0      1.0\r\n");
