@@ -27,6 +27,14 @@ struct color {
     constexpr std::uint8_t g() const noexcept { return static_cast<std::uint8_t>(value >> 8); }
     [[nodiscard]]
     constexpr std::uint8_t b() const noexcept { return static_cast<std::uint8_t>(value >> 0); }
+    [[nodiscard]]
+    constexpr float af() const noexcept { return static_cast<float>(a() / 255.0f); }
+    [[nodiscard]]
+    constexpr float rf() const noexcept { return static_cast<float>(r() / 255.0f); }
+    [[nodiscard]]
+    constexpr float gf() const noexcept { return static_cast<float>(g() / 255.0f); }
+    [[nodiscard]]
+    constexpr float bf() const noexcept { return static_cast<float>(b() / 255.0f); }
 
     void a(std::uint8_t alpha) noexcept
     {
