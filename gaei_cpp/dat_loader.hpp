@@ -18,7 +18,7 @@ class dat_loader {
     static ouchi::tokenizer::separator<char> init_sep()
     {
         using namespace std::literals;
-        return ouchi::tokenizer::separator<char>(std::in_place, { " "s, "\r\n" });
+        return ouchi::tokenizer::separator<char>(std::in_place, { " "s, "\r\n"s });
     }
 
 public:
@@ -29,13 +29,13 @@ public:
     /// <summary>
     /// ファイルをオープンし、<see cref="load(std::istream&amp;)"/>に渡す。
     /// </summary>
-    ouchi::result::result<std::vector<vertex<vec3f, color>>, std::string_view>
+    ouchi::result::result<std::vector<vertex<vec3f, color>>, std::string>
     load(const std::filesystem::path& path) const
     {
-        using namespace std::string_view_literals;
+        using namespace std::string_literals;
         if (!std::filesystem::exists(path))
-            return ouchi::result::err("no such file or directory"sv);
-        std::ifstream s(path);
+            return ouchi::result::err("no such file or directory"s);
+        std::ifstream s(path, std::ios::binary);
         return std::move(load(s));
     }
     /// <summary>
@@ -57,7 +57,7 @@ public:
     /// }
     /// </code>
     /// </example>
-    ouchi::result::result<std::vector<vertex<vec3f, color>>, std::string_view>
+    ouchi::result::result<std::vector<vertex<vec3f, color>>, std::string>
     load(std::istream& s) const
     {
         char line[33] = {};
@@ -69,16 +69,16 @@ public:
                 break;
             if (auto ver = load_line(line))
                 vertexes.push_back(ver.unwrap());
-            else return ouchi::result::err(ver.unwrap_err());
+            else return ouchi::result::err(ver.unwrap_err() + line);
         }
         return ouchi::result::ok(std::move(vertexes));
     }
 private:
 
-    ouchi::result::result<vertex<vec3f, color>, std::string_view>
+    ouchi::result::result<vertex<vec3f, color>, std::string>
     load_line(std::string_view line) const
     {
-        using namespace std::string_view_literals;
+        using namespace std::string_literals;
         vec3f pos{};
         std::string buffer; // to reduce memory allocation (MSVC's SSO is up to 15 byte)
         typename ouchi::translator_between<std::string, float>::type translator;
@@ -91,9 +91,9 @@ private:
             if (tk != ouchi::tokenizer::primitive_token::word) continue;
             if (auto value = translator.get_value(buffer.assign(token))) {
                 pos.coord[vec_c++] = value.value();
-            } else return ouchi::result::err("cannot translate string into float"sv);
+            } else return ouchi::result::err("cannot translate string into float: "s);
         }
-        if (vec_c < 3) return ouchi::result::err("too short line!"sv);
+        if (vec_c < 3) return ouchi::result::err("too short line!"s);
         return ouchi::result::ok(vertex<vec3f, color>{pos, def_c});
     }
 };

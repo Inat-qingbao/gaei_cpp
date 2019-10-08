@@ -30,4 +30,6 @@ add_executable (
 	"test_vertex.cpp"
 	"test_dat_loader.cpp"
 	"test_color.cpp"
+	"test_vec_utl.cpp"
+	"test_vrml_writer.cpp"
 )
