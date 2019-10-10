@@ -25,13 +25,13 @@ public:
     [[nodiscard]]
     constexpr explicit operator bool() const noexcept { return is_valid_; }
     [[nodiscard]]
-    constexpr unsigned int a() const noexcept { return static_cast<unsigned int>(value_ >> 24); }
+    constexpr unsigned int a() const noexcept { return 0xFFu & static_cast<unsigned int>(value_ >> 24); }
     [[nodiscard]]
-    constexpr unsigned int r() const noexcept { return static_cast<unsigned int>(value_ >> 16); }
+    constexpr unsigned int r() const noexcept { return 0xFFu & static_cast<unsigned int>(value_ >> 16); }
     [[nodiscard]]
-    constexpr unsigned int g() const noexcept { return static_cast<unsigned int>(value_ >> 8); }
+    constexpr unsigned int g() const noexcept { return 0xFFu & static_cast<unsigned int>(value_ >> 8); }
     [[nodiscard]]
-    constexpr unsigned int b() const noexcept { return static_cast<unsigned int>(value_ >> 0); }
+    constexpr unsigned int b() const noexcept { return 0xFFu & static_cast<unsigned int>(value_ >> 0); }
     [[nodiscard]]
     constexpr float af() const noexcept { return static_cast<float>(a() / 255.0f); }
     [[nodiscard]]
