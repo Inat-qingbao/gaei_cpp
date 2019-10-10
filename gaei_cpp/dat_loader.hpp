@@ -83,7 +83,6 @@ private:
         std::string buffer; // to reduce memory allocation (MSVC's SSO is up to 15 byte)
         typename ouchi::translator_between<std::string, float>::type translator;
         unsigned vec_c = 0;
-        constexpr color def_c = colors::white;
         while (line.size()) {
             auto [tk, it] = sep_(line);
             auto token = line.substr(0, std::distance(line.begin(), it));
@@ -94,7 +93,7 @@ private:
             } else return ouchi::result::err("cannot translate string into float: "s);
         }
         if (vec_c < 3) return ouchi::result::err("too short line!"s);
-        return ouchi::result::ok(vertex<vec3f, color>{pos, def_c});
+        return ouchi::result::ok(vertex<vec3f, color>{pos, colors::none});
     }
 };
 
