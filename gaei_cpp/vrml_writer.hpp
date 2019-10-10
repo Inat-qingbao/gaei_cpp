@@ -184,16 +184,14 @@ struct appearance {
     }
 };
 
-// こいつはvertexのvectorを保持するべき。
-// なのでvertexのvectorを受け取る関数が必要。
 class indexed_face_set {
     std::vector<gaei::vertex<gaei::vec3f, gaei::color>> vertexes_;
 public:
     bool write(std::ostream& out) const
     {
-        out << "geometry IndexedFaceSet{";
-        write_coord(out);
-        write_color(out);
+        out << "geometry IndexedFaceSet{\n";
+        auto [unused, write] = write_coord(out);
+        write_color(out, write);
         //coord_index add later
         out << "}\n";
         return (bool)out;
@@ -201,28 +199,32 @@ public:
     auto& data() noexcept { return vertexes_; }
     const auto& data() const noexcept { return vertexes_; }
 private:
-    bool write_color(std::ostream& out) const
+    bool write_color(std::ostream& out, bool write) const
     {
+        if (!write) return true;
         out << "color Color{color[";
         for (auto&& v : vertexes_) {
-            out << static_cast<float>(v.color.r() / 255.0) << ' ';
-            out << static_cast<float>(v.color.g() / 255.0) << ' ';
-            out << static_cast<float>(v.color.b() / 255.0);
+            out << static_cast<float>(v.color.r() / 255.0) << ' '
+                << static_cast<float>(v.color.g() / 255.0) << ' '
+                << static_cast<float>(v.color.b() / 255.0);
             out << '\n';
         }
         out << "]}";
         return (bool)out;
     }
-    bool write_coord(std::ostream& out) const
+    [[nodiscard]]
+    std::tuple<bool, bool> write_coord(std::ostream& out) const
     {
+        bool is_color_none = false;
         out << "coord Coordinate{";
         out << "point[";
         for (const auto& v : vertexes_) {
             out << v.position.x() << " " << v.position.y() << " " << v.position.z() << '\n';
+            is_color_none |= (bool)v.color;
         }
         out << "]\n";
         out << "}\n";
-        return (bool)out;
+        return { (bool)out, false };
     }
 };
 
@@ -237,6 +239,11 @@ struct box {
         out << "}\n";
         return (bool)out;
     }
+};
+
+struct point_set {
+    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> points;
+    
 };
 
 struct transform : public node_base {
