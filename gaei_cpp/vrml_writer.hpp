@@ -192,7 +192,7 @@ struct appearance {
     template<
         class T = Texture,
         std::enable_if_t<! detail::has_member_write_v<T>>* = nullptr>
-        bool write(std::ostream& out) const
+    bool write(std::ostream& out) const
     {
         out << "appearance Appearance {\n";
         mate.write(out);
