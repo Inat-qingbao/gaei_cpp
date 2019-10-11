@@ -37,3 +37,13 @@ OUCHI_TEST_CASE(test_vrml_writer)
     vw.write(".\\box.wrl");
     // テストを書くのが非常にしんどいので表示して確認してくれ！！！！
 }
+
+OUCHI_TEST_CASE(test_point_set)
+{
+    gaei::vrml::vrml_writer vw;
+    gaei::vrml::shape<gaei::vrml::point_set, gaei::vrml::appearance<>> ps;
+    ps.geometry().points.assign(std::begin(vs), std::end(vs));
+    vw.push(ps);
+    vw.write(".\\pointset.wrl");
+    // テストを書くのが非常にしんどいので表示して確認してくれ！！！！
+}

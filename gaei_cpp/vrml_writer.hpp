@@ -266,7 +266,8 @@ struct point_set {
     {
         out << "geometry PointSet {\n";
         auto [unused, color] = write_coord(out);
-        if (color);
+        if (color)
+            write_color(out);
         out << "}\n";
         return (bool)out;
     }
@@ -276,25 +277,25 @@ private:
     std::tuple<bool, bool> write_coord(std::ostream& out) const
     {
         bool color = false;
-        out << "coord [\n";
+        out << "coord Coordinate {\npoint [\n";
         for (auto&& i : points) {
             out << i.position.x() << ' '
                 << i.position.y() << ' '
                 << i.position.z() << '\n';
             color |= (bool)i.color;
         }
-        out << "]\n";
+        out << "]}\n";
         return std::make_tuple((bool)out, color);
     }
-    bool write_color(std::ostream& out)
+    bool write_color(std::ostream& out) const
     {
-        out << "color [\n";
+        out << "color Color {\ncolor [\n";
         for (auto&& i : points) {
             out << i.color.rf() << ' '
                 << i.color.gf() << ' '
                 << i.color.bf() << '\n';
         }
-        out << "]\n";
+        out << "]}\n";
         return (bool)out;
     }
 };
