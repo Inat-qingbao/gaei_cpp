@@ -262,7 +262,41 @@ struct box {
 
 struct point_set {
     std::vector<gaei::vertex<gaei::vec3f, gaei::color>> points;
-    
+    bool write(std::ostream& out) const
+    {
+        out << "geometry PointSet {\n";
+        auto [unused, color] = write_coord(out);
+        if (color);
+        out << "}\n";
+        return (bool)out;
+    }
+private:
+    //return:result, write color? 
+    [[nodiscard]]
+    std::tuple<bool, bool> write_coord(std::ostream& out) const
+    {
+        bool color = false;
+        out << "coord [\n";
+        for (auto&& i : points) {
+            out << i.position.x() << ' '
+                << i.position.y() << ' '
+                << i.position.z() << '\n';
+            color |= (bool)i.color;
+        }
+        out << "]\n";
+        return std::make_tuple((bool)out, color);
+    }
+    bool write_color(std::ostream& out)
+    {
+        out << "color [\n";
+        for (auto&& i : points) {
+            out << i.color.rf() << ' '
+                << i.color.gf() << ' '
+                << i.color.bf() << '\n';
+        }
+        out << "]\n";
+        return (bool)out;
+    }
 };
 
 struct transform : public node_base {
