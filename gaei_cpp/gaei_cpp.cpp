@@ -61,16 +61,14 @@ bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
     namespace vrml = gaei::vrml;
     std::ofstream of{ path };
     vrml::vrml_writer vw;
-
-    for (auto&& v : vs) {
-        vrml::transform t;
-        using box_shape = vrml::shape<gaei::vrml::box, vrml::appearance<>>;
-        box_shape box;
-        t.translation = gaei::vec3f{ v.position.x(), v.position.y(), 0 };
-        box.geometry().size = gaei::vec3f{ 1, 1, v.position.z() };
-        t.children.push_back(std::make_unique<box_shape>(box));
-        vw.push(std::move(t));
+    vrml::shape<vrml::point_set, vrml::appearance<>> sp;
+    sp.geometry().points.reserve(vs.size());
+    // 欠損点をコピーしない
+    for (auto& i : vs) {
+        if (i.position.z() > -50)
+            sp.geometry().points.push_back(i);
     }
+    vw.push(std::move(sp));
     return vw.write(path);
 }
 
