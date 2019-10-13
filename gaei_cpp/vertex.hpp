@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <cstddef>
 #include <type_traits>
+#include "ouchilib/utl/multiitr.hpp"
 
 namespace gaei {
 
@@ -43,6 +44,18 @@ struct vector {
     template<size_t D = Dim, std::enable_if_t<(D >= 3)>* = nullptr>
     [[nodiscard]]
     constexpr const T& z() const noexcept { return coord[2]; };
+
+    friend constexpr bool operator== (const vector& lhs, const vector& rhs) noexcept
+    {
+        for (auto [l, r] : ouchi::multiitr{ lhs.coord, rhs.coord }) {
+            if (l != r) return false;
+        }
+        return true;
+    }
+    friend constexpr bool operator!= (const vector& lhs, const vector& rhs) noexcept
+    {
+        return !(lhs == rhs);
+    }
 };
 
 using vec2f = vector<float, 2>;

@@ -6,17 +6,16 @@
 namespace {
 
 constexpr std::string_view correct_indexed_face_set =
-"geometry IndexedFaceSet{coord Coordinate{point[0 0 0\n"
+"geometry IndexedFaceSet{\n"
+"coord Coordinate{point[0 0 0\n"
 "1 1 1\n"
 "]\n"
 "}\n"
-"color Color{color[1 1 1\n"
-"1 1 1\n"
-"]}}\n";
+"}\n";
 
 gaei::vertex<gaei::vec3f, gaei::color> vs[] = {
-    {{0,0,0}, {255,255,255}},
-    {{1,1,1}, {255,255,255}}
+    {{0,0,0}, gaei::colors::none},
+    {{1,1,1}, gaei::colors::none}
 };
 
 }
@@ -36,5 +35,15 @@ OUCHI_TEST_CASE(test_vrml_writer)
     gaei::vrml::shape<gaei::vrml::box, gaei::vrml::appearance<>> box;
     vw.push(box);
     vw.write(".\\box.wrl");
+    // テストを書くのが非常にしんどいので表示して確認してくれ！！！！
+}
+
+OUCHI_TEST_CASE(test_point_set)
+{
+    gaei::vrml::vrml_writer vw;
+    gaei::vrml::shape<gaei::vrml::point_set, gaei::vrml::appearance<>> ps;
+    ps.geometry().points.assign(std::begin(vs), std::end(vs));
+    vw.push(ps);
+    vw.write(".\\pointset.wrl");
     // テストを書くのが非常にしんどいので表示して確認してくれ！！！！
 }

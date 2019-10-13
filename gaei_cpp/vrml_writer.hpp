@@ -24,6 +24,18 @@ inline constexpr bool has_member_ ## member_name ## _v = has_member_ ## member_n
 
 GAEI_HAS_MEMBER(write);
 
+template<class T, class ...Printable>
+bool write_if_different(const T& default_value,
+                        const T& actual_value,
+                        std::ostream& out,
+                        Printable&& ...pt)
+{
+    if (default_value == actual_value)
+        return false;
+    (out << ... << pt);
+    return true;
+}
+
 }
 
 struct node_base {
@@ -116,29 +128,34 @@ protected:
 
 struct material {
     float ambient_intensity = 0.2f;
-    color diffuse_color = color{ 204, 204, 204 };
-    color specular_color = color{ 0, 0, 0 };
+    color diffuse_color = colors::none;
+    color specular_color = colors::none;
     float shininess = 0.2f;
-    color emissive_color = color{ 0, 0, 0 };
+    color emissive_color = colors::none;
     float transparency = 0;
     bool write(std::ostream& out) const
     {
+        constexpr auto default_value = material{};
         out << "material Material {";
-        out << "ambientIntensity " << ambient_intensity << '\n';
-        out << "diffuseColor " << static_cast<float>(diffuse_color.r() / 255.0) << ' '
-            << static_cast<float>(diffuse_color.g() / 255.0) << ' '
-            << static_cast<float>(diffuse_color.b() / 255.0) << '\n';
-
-        out << "specularColor " << static_cast<float>(specular_color.r() / 255.0) << ' '
-            << static_cast<float>(specular_color.g() / 255.0) << ' '
-            << static_cast<float>(specular_color.b() / 255.0) << '\n';
-
-        out << "emissiveColor " << static_cast<float>(emissive_color.r() / 255.0) << ' '
-            << static_cast<float>(emissive_color.g() / 255.0) << ' '
-            << static_cast<float>(emissive_color.b() / 255.0) << '\n';
-
-        out << "shininess " << shininess << '\n';
-        out << "transparency " << shininess << '\n';
+        detail::write_if_different(default_value.ambient_intensity,
+                                   ambient_intensity,
+                                   out, "ambientIntensity ", ambient_intensity, '\n');
+        detail::write_if_different(default_value.diffuse_color,
+                                   diffuse_color,
+                                   out, "diffuseColor ",
+                                   diffuse_color.rf(), diffuse_color.gf(), diffuse_color.bf(), '\n');
+        detail::write_if_different(default_value.specular_color,
+                                   specular_color,
+                                   out, "specularColor ",
+                                   specular_color.rf(), specular_color.gf(), specular_color.bf(), '\n');
+        detail::write_if_different(default_value.emissive_color,
+                                   emissive_color,
+                                   out, "emissiveColor ",
+                                   emissive_color.rf(), emissive_color.gf(), emissive_color.bf(), '\n');
+        detail::write_if_different(default_value.shininess, shininess,
+                                   out, "shininess ", shininess, '\n');
+        detail::write_if_different(default_value.transparency, transparency,
+                                   out, "transparency ", transparency, '\n');
         out << "}\n";
         return (bool)out;
     }
@@ -175,7 +192,7 @@ struct appearance {
     template<
         class T = Texture,
         std::enable_if_t<! detail::has_member_write_v<T>>* = nullptr>
-        bool write(std::ostream& out) const
+    bool write(std::ostream& out) const
     {
         out << "appearance Appearance {\n";
         mate.write(out);
@@ -184,16 +201,14 @@ struct appearance {
     }
 };
 
-// こいつはvertexのvectorを保持するべき。
-// なのでvertexのvectorを受け取る関数が必要。
 class indexed_face_set {
     std::vector<gaei::vertex<gaei::vec3f, gaei::color>> vertexes_;
 public:
     bool write(std::ostream& out) const
     {
-        out << "geometry IndexedFaceSet{";
-        write_coord(out);
-        write_color(out);
+        out << "geometry IndexedFaceSet{\n";
+        auto [unused, write] = write_coord(out);
+        write_color(out, write);
         //coord_index add later
         out << "}\n";
         return (bool)out;
@@ -201,28 +216,32 @@ public:
     auto& data() noexcept { return vertexes_; }
     const auto& data() const noexcept { return vertexes_; }
 private:
-    bool write_color(std::ostream& out) const
+    bool write_color(std::ostream& out, bool write) const
     {
+        if (!write) return true;
         out << "color Color{color[";
         for (auto&& v : vertexes_) {
-            out << static_cast<float>(v.color.r() / 255.0) << ' ';
-            out << static_cast<float>(v.color.g() / 255.0) << ' ';
-            out << static_cast<float>(v.color.b() / 255.0);
+            out << static_cast<float>(v.color.r() / 255.0) << ' '
+                << static_cast<float>(v.color.g() / 255.0) << ' '
+                << static_cast<float>(v.color.b() / 255.0);
             out << '\n';
         }
         out << "]}";
         return (bool)out;
     }
-    bool write_coord(std::ostream& out) const
+    [[nodiscard]]
+    std::tuple<bool, bool> write_coord(std::ostream& out) const
     {
+        bool is_color_none = false;
         out << "coord Coordinate{";
         out << "point[";
         for (const auto& v : vertexes_) {
             out << v.position.x() << " " << v.position.y() << " " << v.position.z() << '\n';
+            is_color_none |= (bool)v.color;
         }
         out << "]\n";
         out << "}\n";
-        return (bool)out;
+        return { (bool)out, false };
     }
 };
 
@@ -230,11 +249,53 @@ struct box {
     vec3f size = { 2,2,2 };
     bool write(std::ostream& out) const
     {
+        constexpr auto c = box{};
         out << "geometry Box { \n";
-        out << "size " << size.x() << ' '
-            << size.y() << ' '
-            << size.z() << '\n';
+        if(size != c.size)
+            out << "size " << size.x() << ' '
+                << size.y() << ' '
+                << size.z() << '\n';
         out << "}\n";
+        return (bool)out;
+    }
+};
+
+struct point_set {
+    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> points;
+    bool write(std::ostream& out) const
+    {
+        out << "geometry PointSet {\n";
+        auto [unused, color] = write_coord(out);
+        if (color)
+            write_color(out);
+        out << "}\n";
+        return (bool)out;
+    }
+private:
+    //return:result, write color? 
+    [[nodiscard]]
+    std::tuple<bool, bool> write_coord(std::ostream& out) const
+    {
+        bool color = false;
+        out << "coord Coordinate {\npoint [\n";
+        for (auto&& i : points) {
+            out << i.position.x() << ' '
+                << i.position.y() << ' '
+                << i.position.z() << '\n';
+            color |= (bool)i.color;
+        }
+        out << "]}\n";
+        return std::make_tuple((bool)out, color);
+    }
+    bool write_color(std::ostream& out) const
+    {
+        out << "color Color {\ncolor [\n";
+        for (auto&& i : points) {
+            out << i.color.rf() << ' '
+                << i.color.gf() << ' '
+                << i.color.bf() << '\n';
+        }
+        out << "]}\n";
         return (bool)out;
     }
 };
