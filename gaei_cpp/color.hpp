@@ -25,6 +25,10 @@ public:
     [[nodiscard]]
     constexpr explicit operator bool() const noexcept { return is_valid_; }
     [[nodiscard]]
+    constexpr bool is_valid() const noexcept { return is_valid_; }
+    [[nodiscard]]
+    constexpr std::uint32_t value() const noexcept { return value_; }
+    [[nodiscard]]
     constexpr unsigned int a() const noexcept { return 0xFFu & static_cast<unsigned int>(value_ >> 24); }
     [[nodiscard]]
     constexpr unsigned int r() const noexcept { return 0xFFu & static_cast<unsigned int>(value_ >> 16); }
