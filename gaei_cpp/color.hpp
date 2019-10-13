@@ -12,9 +12,9 @@ public:
                     std::uint8_t blue,
                     std::uint8_t alpha = 0xFF)
         : value_(static_cast<std::uint32_t>(alpha) << 24 |
-                static_cast<std::uint32_t>(red) << 16 |
-                static_cast<std::uint32_t>(green) << 8 |
-                static_cast<std::uint32_t>(blue))
+                 static_cast<std::uint32_t>(red) << 16 |
+                 static_cast<std::uint32_t>(green) << 8 |
+                 static_cast<std::uint32_t>(blue))
         , is_valid_{ true }
     {}
     constexpr color()

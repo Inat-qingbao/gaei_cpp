@@ -35,10 +35,7 @@ load(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& buf,
     std::cout << "loading " << p.string() << std::endl;
     buf.reserve(buf.size() + std::filesystem::file_size(p) / 32/* line size */);
     gaei::dat_loader dl;
-    if (auto r = dl.load(p); !r) return ouchi::result::err(std::string(r.unwrap_err()));
-    else {
-        for (auto&& v : r.unwrap()) buf.push_back(v);
-    }
+    if (auto r = dl.load(p, buf); !r) return ouchi::result::err(std::string(r.unwrap_err()));
     return ouchi::result::ok(std::monostate{});
 }
 

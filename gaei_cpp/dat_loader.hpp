@@ -38,6 +38,15 @@ public:
         std::ifstream s(path, std::ios::binary);
         return std::move(load(s));
     }
+    ouchi::result::result<std::monostate, std::string>
+    load(const std::filesystem::path& path, std::vector<vertex<vec3f, color>>& dest) const
+    {
+        using namespace std::string_literals;
+        if (!std::filesystem::exists(path))
+            return ouchi::result::err("no such file or directory"s);
+        std::ifstream s(path, std::ios::binary);
+        return std::move(load(s, dest));
+    }
     /// <summary>
     /// ストリームからデータを読み取り、パースして点集合を返す。
     /// </summary>
@@ -60,18 +69,24 @@ public:
     ouchi::result::result<std::vector<vertex<vec3f, color>>, std::string>
     load(std::istream& s) const
     {
-        char line[33] = {};
         std::vector<vertex<vec3f, color>> vertexes;
+        if (auto r = load(s, vertexes); !r) return ouchi::result::err(r.unwrap_err());
+        return ouchi::result::ok(std::move(vertexes));
+    }
+    ouchi::result::result<std::monostate, std::string>
+    load(std::istream& s, std::vector<vertex<vec3f, color>>& dest) const
+    {
+        char line[33] = {};
         while (true) {
             std::memset(line, 0, sizeof(line));
             s.read(line, 32);
             if (s.eof())
                 break;
             if (auto ver = load_line(line))
-                vertexes.push_back(ver.unwrap());
+                dest.push_back(ver.unwrap());
             else return ouchi::result::err(ver.unwrap_err() + line);
         }
-        return ouchi::result::ok(std::move(vertexes));
+        return ouchi::result::ok(std::monostate{});
     }
 private:
 
