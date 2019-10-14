@@ -12,7 +12,7 @@ namespace gaei {
 template<class T, std::size_t Dim>
 struct vector {
     static_assert(std::is_arithmetic_v<T>);
-    static_assert(Dim > 0)
+    static_assert(Dim > 0);
 
     /// <summary>
     /// 点の各次元の座標を格納します。
