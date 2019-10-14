@@ -12,13 +12,15 @@ namespace gaei {
 template<class T, std::size_t Dim>
 struct vector {
     static_assert(std::is_arithmetic_v<T>);
+    static_assert(Dim > 0)
+
     /// <summary>
     /// 点の各次元の座標を格納します。
     /// </summary>
     T coord[Dim];
 
     /// <summary>
-    /// 点が1次元以上である場合のみ有効です。点のx座標への参照を返します。
+    /// プログラムがwell-formedであるとき常に有効です。点のx座標への参照を返します。
     /// </summary>
     template<size_t D = Dim, std::enable_if_t<(D >= 1)>* = nullptr>
     [[nodiscard]]
@@ -28,6 +30,7 @@ struct vector {
     constexpr const T& x() const noexcept { return coord[0]; };
     /// <summary>
     /// 点が2次元以上である場合のみ有効です。点のy座標への参照を返します。
+    /// 点が2次元未満であるときこのメソッドは実体化に失敗します。
     /// </summary>
     template<size_t D = Dim, std::enable_if_t<(D >= 2)>* = nullptr>
     [[nodiscard]]
@@ -37,6 +40,7 @@ struct vector {
     constexpr const T& y() const noexcept { return coord[1]; };
     /// <summary>
     /// 点が3次元以上である場合のみ有効です。点のz座標への参照を返します。
+    /// 点が3次元未満であるときこのメソッドは実体化に失敗します。
     /// </summary>
     template<size_t D = Dim, std::enable_if_t<(D >= 3)>* = nullptr>
     [[nodiscard]]
@@ -45,6 +49,24 @@ struct vector {
     [[nodiscard]]
     constexpr const T& z() const noexcept { return coord[2]; };
 
+    [[nodiscard]]
+    static constexpr vector zero() noexcept { return vector{}; }
+
+    [[nodiscard]]
+    friend constexpr bool operator< (const vector& lhs, const vector& rhs) noexcept
+    {
+        for (auto [l, r] : ouchi::multiitr{ lhs.coord, rhs.coord }) {
+            if (l == r) continue;
+            else return l < r;
+        }
+        return false;
+    }
+    [[nodiscard]]
+    friend constexpr bool operator> (const vector& lhs, const vector& rhs) noexcept
+    {
+        return rhs < lhs;
+    }
+    [[nodiscard]]
     friend constexpr bool operator== (const vector& lhs, const vector& rhs) noexcept
     {
         for (auto [l, r] : ouchi::multiitr{ lhs.coord, rhs.coord }) {
@@ -52,9 +74,20 @@ struct vector {
         }
         return true;
     }
+    [[nodiscard]]
     friend constexpr bool operator!= (const vector& lhs, const vector& rhs) noexcept
     {
         return !(lhs == rhs);
+    }
+    [[nodiscard]]
+    friend constexpr bool operator<= (const vector& lhs, const vector& rhs) noexcept
+    {
+        return (lhs < rhs) || (lhs == rhs);
+    }
+    [[nodiscard]]
+    friend constexpr bool operator>= (const vector& lhs, const vector& rhs) noexcept
+    {
+        return (lhs > rhs) || (lhs == rhs);
     }
 };
 

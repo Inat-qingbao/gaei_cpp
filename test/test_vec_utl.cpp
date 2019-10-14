@@ -4,17 +4,17 @@
 OUCHI_TEST_CASE(test_distance)
 {
     {
-        gaei::vector<int, 2> a{ 0, 0 };
+        constexpr auto zero = gaei::vector<int, 2>::zero();
         gaei::vector<int, 2> b{ 3, 0 };
 
         // distance(a, b) が 3と等しいか調べる。
-        OUCHI_CHECK_EQUAL(gaei::distance(a, b), 3);
+        OUCHI_CHECK_EQUAL(gaei::distance(zero, b), 3);
     }
     {
-        gaei::vector<double, 3> a{ 0, 0, 0 };
+        constexpr auto zero = gaei::vector<double, 3>::zero();
         gaei::vector<double, 3> b{ 3, 0, 4 };
 
-        OUCHI_CHECK_EQUAL(gaei::distance(a, b), 5);
+        OUCHI_CHECK_EQUAL(gaei::distance(zero, b), 5);
     }
 }
 
