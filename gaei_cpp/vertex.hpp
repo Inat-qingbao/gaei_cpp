@@ -104,6 +104,9 @@ struct vector {
     [[nodiscard]]
     static constexpr vector zero() noexcept { return vector{}; }
 
+    /// <summary>
+    /// 辞書順に並べたときlhsがrhsより前より来るならばtrue。それ以外はfalse
+    /// </summary>
     [[nodiscard]]
     friend constexpr bool operator< (const vector& lhs, const vector& rhs) noexcept
     {
