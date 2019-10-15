@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <cstddef>
 #include <type_traits>
+#include "color.hpp"
 #include "ouchilib/utl/multiitr.hpp"
 
 namespace gaei {
@@ -145,9 +146,9 @@ struct vector {
 using vec2f = vector<float, 2>;
 using vec3f = vector<float, 3>;
 
-template<class PosT, class ColorT>
+template<class PosT = vec3f, class ColorT = color>
 struct vertex {
-    PosT position;
+    PosT position = PosT{};
     ColorT color = ColorT{};
 };
 
