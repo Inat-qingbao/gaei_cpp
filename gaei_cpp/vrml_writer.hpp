@@ -5,6 +5,7 @@
 #include <fstream>
 #include <memory>
 #include <filesystem>
+#include <variant>  // for std::monostate
 
 #include"color.hpp"
 #include"vertex.hpp"
@@ -172,7 +173,7 @@ struct texture_transform {
     }
 };
 
-template<class Texture = std::nullptr_t>
+template<class Texture = std::monostate>
 struct appearance {
     material mate;
     Texture texture = Texture{};
