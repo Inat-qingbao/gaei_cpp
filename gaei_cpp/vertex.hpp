@@ -4,6 +4,49 @@
 #include "ouchilib/utl/multiitr.hpp"
 
 namespace gaei {
+namespace detail {
+
+template<class T, class = void>
+struct is_addable : std::false_type {};
+
+template<class T>
+struct is_addable<T, std::void_t<decltype(std::declval<T&>() + std::declval<T&>())>>
+    : std::true_type {};
+
+template<class T>
+constexpr bool is_addable_v = is_addable<T>::value;
+
+template<class T, class = void>
+struct is_multipliable : std::false_type {};
+
+template<class T>
+struct is_multipliable<T, std::void_t<decltype(std::declval<T&>() * std::declval<T&>())>>
+    : std::true_type {};
+
+template<class T>
+constexpr bool is_multipliable_v = is_multipliable<T>::value;
+
+template<class T, class = void>
+struct is_subtractable : std::false_type {};
+
+template<class T>
+struct is_subtractable<T, std::void_t<decltype(std::declval<T&>() - std::declval<T&>())>>
+    : std::true_type {};
+
+template<class T>
+constexpr bool is_subtractable_v = is_subtractable<T>::value;
+
+template<class T, class = void>
+struct is_divisible : std::false_type {};
+
+template<class T>
+struct is_divisible<T, std::void_t<decltype(std::declval<T&>() / std::declval<T&>())>>
+    : std::true_type {};
+
+template<class T>
+constexpr bool is_divisible_v = is_divisible<T>::value;
+}   // namespace detail
+
 
 /// <summary>
 /// 点を表現します。
@@ -11,8 +54,16 @@ namespace gaei {
 /// <typeparam name="T">点の各次元の型</typeparam>
 template<class T, std::size_t Dim>
 struct vector {
-    static_assert(std::is_arithmetic_v<T>);
+    // 四則演算が可能か？
+    static_assert(detail::is_addable_v<T> &&
+                  detail::is_multipliable_v<T> &&
+                  detail::is_subtractable_v<T> &&
+                  detail::is_divisible_v<T>);
+    // 次元は0より大きいか？
     static_assert(Dim > 0);
+
+    using value_type = T;
+    static constexpr size_t dimension = Dim;
 
     /// <summary>
     /// 点の各次元の座標を格納します。
