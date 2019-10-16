@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <type_traits>
 #include "ouchilib/utl/multiitr.hpp"
+#include "meta.hpp"
 
 namespace gaei {
 
