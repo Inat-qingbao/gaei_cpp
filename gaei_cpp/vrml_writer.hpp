@@ -5,24 +5,15 @@
 #include <fstream>
 #include <memory>
 #include <filesystem>
+#include <variant>  // for std::monostate
 
-#include"color.hpp"
-#include"vertex.hpp"
+#include "color.hpp"
+#include "vertex.hpp"
+#include "meta.hpp"
 
 namespace gaei::vrml {
 
 namespace detail {
-
-#define GAEI_HAS_MEMBER(member_name)\
-template<class T, class = void>\
-struct has_member_ ## member_name : std::false_type {};\
-\
-template<class T>\
-struct has_member_ ## member_name<T, std::void_t<decltype(&(T:: ## member_name))>> : std::true_type {};\
-template<class T>\
-inline constexpr bool has_member_ ## member_name ## _v = has_member_ ## member_name <T>::value;
-
-GAEI_HAS_MEMBER(write);
 
 template<class T, class ...Printable>
 bool write_if_different(const T& default_value,
@@ -35,8 +26,7 @@ bool write_if_different(const T& default_value,
     (out << ... << pt);
     return true;
 }
-
-}
+}// namespace detail
 
 struct node_base {
     virtual ~node_base() = default;
@@ -172,14 +162,14 @@ struct texture_transform {
     }
 };
 
-template<class Texture = std::nullptr_t>
+template<class Texture = std::monostate>
 struct appearance {
     material mate;
     Texture texture = Texture{};
     texture_transform transform = texture_transform{};
     template<
         class T = Texture,
-        std::enable_if_t<detail::has_member_write_v<T>>* = nullptr>
+        std::enable_if_t<gaei::detail::has_member_write_v<T>>* = nullptr>
         bool write(std::ostream& out) const
     {
         out << "appearance Appearance {\n";
@@ -191,7 +181,7 @@ struct appearance {
     }
     template<
         class T = Texture,
-        std::enable_if_t<! detail::has_member_write_v<T>>* = nullptr>
+        std::enable_if_t<! gaei::detail::has_member_write_v<T>>* = nullptr>
     bool write(std::ostream& out) const
     {
         out << "appearance Appearance {\n";
