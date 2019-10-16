@@ -6,49 +6,6 @@
 #include "meta.hpp"
 
 namespace gaei {
-namespace detail {
-
-template<class T, class = void>
-struct is_addable : std::false_type {};
-
-template<class T>
-struct is_addable<T, std::void_t<decltype(std::declval<T&>() + std::declval<T&>())>>
-    : std::true_type {};
-
-template<class T>
-constexpr bool is_addable_v = is_addable<T>::value;
-
-template<class T, class = void>
-struct is_multipliable : std::false_type {};
-
-template<class T>
-struct is_multipliable<T, std::void_t<decltype(std::declval<T&>() * std::declval<T&>())>>
-    : std::true_type {};
-
-template<class T>
-constexpr bool is_multipliable_v = is_multipliable<T>::value;
-
-template<class T, class = void>
-struct is_subtractable : std::false_type {};
-
-template<class T>
-struct is_subtractable<T, std::void_t<decltype(std::declval<T&>() - std::declval<T&>())>>
-    : std::true_type {};
-
-template<class T>
-constexpr bool is_subtractable_v = is_subtractable<T>::value;
-
-template<class T, class = void>
-struct is_divisible : std::false_type {};
-
-template<class T>
-struct is_divisible<T, std::void_t<decltype(std::declval<T&>() / std::declval<T&>())>>
-    : std::true_type {};
-
-template<class T>
-constexpr bool is_divisible_v = is_divisible<T>::value;
-}   // namespace detail
-
 
 /// <summary>
 /// 点を表現します。
