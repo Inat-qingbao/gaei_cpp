@@ -2,6 +2,7 @@
 #include <cstddef>
 #include <type_traits>
 #include "ouchilib/utl/multiitr.hpp"
+#include "meta.hpp"
 
 namespace gaei {
 
@@ -11,7 +12,11 @@ namespace gaei {
 /// <typeparam name="T">点の各次元の型</typeparam>
 template<class T, std::size_t Dim>
 struct vector {
-    static_assert(std::is_arithmetic_v<T>);
+    static_assert(detail::is_addable_v<T>&&
+                  detail::is_subtractable_v<T>&&
+                  detail::is_multipliable_v<T>&&
+                  detail::is_divisible_v<T>);
+    static_assert(Dim > 0);
     /// <summary>
     /// 点の各次元の座標を格納します。
     /// </summary>
