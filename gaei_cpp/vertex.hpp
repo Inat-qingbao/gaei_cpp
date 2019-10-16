@@ -3,6 +3,7 @@
 #include <type_traits>
 #include "color.hpp"
 #include "ouchilib/utl/multiitr.hpp"
+#include "meta.hpp"
 
 namespace gaei {
 namespace detail {
