@@ -32,6 +32,7 @@ OUCHI_TEST_CASE(test_vector_order)
         OUCHI_CHECK_TRUE(v1 < v2);
         OUCHI_CHECK_EQUAL(v1, v3);
         OUCHI_CHECK_TRUE(v1 > v4);
+        OUCHI_CHECK_EQUAL(v1, (gaei::vec2f{ 1, 1 }));
     }
 }
 
