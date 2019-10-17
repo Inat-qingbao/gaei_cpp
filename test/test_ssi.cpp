@@ -4,11 +4,10 @@
 
 namespace {
 
-//   0 1 2
-// 0 c * c
-// 1 * o *
-// 2 * o *
-// 3 O C O
+//   0 1 2 3
+// 0 c * * O
+// 1 * o o C
+// 2 c * * O
 constexpr gaei::vertex<> vs[] = {
     {gaei::vec3f{0, 0, 0}, gaei::color{}},
     {gaei::vec3f{0, 1, 0}, gaei::color{}},
