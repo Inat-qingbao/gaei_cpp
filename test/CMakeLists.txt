@@ -33,4 +33,5 @@ add_executable (
 	"test_color.cpp"
 	"test_vec_utl.cpp"
 	"test_vrml_writer.cpp"
+    "test_ssi.cpp"
 )
