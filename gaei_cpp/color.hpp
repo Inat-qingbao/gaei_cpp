@@ -91,7 +91,10 @@ public:
     [[nodiscard]]
     friend constexpr color operator+(color lhs, color rhs) noexcept
     {
-        return color{ lhs.value() | rhs.value() };
+        return color(std::min(255u, lhs.r() + rhs.r()),
+                     std::min(255u, lhs.g() + rhs.g()),
+                     std::min(255u, lhs.b() + rhs.b()),
+                     std::min(255u, lhs.a() + rhs.a()));
     }
     [[nodiscard]]
     friend constexpr color operator*(color lhs, color rhs) noexcept
