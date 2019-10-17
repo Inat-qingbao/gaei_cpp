@@ -5,9 +5,9 @@
 namespace {
 
 //   0 1 2 3
-// 0 c * * O
-// 1 * o o C
-// 2 c * * O
+// 0 c * * C
+// 1 * o o O
+// 2 c * * C
 constexpr gaei::vertex<> vs[] = {
     {gaei::vec3f{0, 0, 0}, gaei::color{}},
     {gaei::vec3f{0, 1, 0}, gaei::color{}},
@@ -24,7 +24,7 @@ constexpr gaei::vertex<> vs[] = {
 };
 constexpr unsigned res[] = {
     3,0,0,2,
-    0,1,1,4,
+    0,1,1,2,
     3,0,0,2
 };
 
@@ -35,7 +35,7 @@ OUCHI_TEST_CASE(test_ssi)
     gaei::surface_structure_isolate ssi;
     std::vector<gaei::vertex<>> vvec(vs, vs+12);
     ssi(vvec);
-    unsigned labels[5] = {};
+    unsigned labels[4] = {};
     for (auto i = 0u; i < vvec.size(); ++i) {
         labels[res[i]] = vvec.at(i).color.value();
     }

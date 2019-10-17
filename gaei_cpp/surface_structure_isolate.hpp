@@ -59,13 +59,15 @@ private:
                                                        [](const vec2f& v, const vertex<>& vv) {return v < vv.position; }
                                                        });
 
-                // nvの位置に要素がないか、すでに訪問済みならば次の探索候補を見る
-                if (nitr == vs.end() || nitr->color.is_valid()) continue;
+                // nvの位置に要素がないならば次の探索候補を見る
+                if (nitr == vs.end()) continue;
                 // nvの位置の要素に別のラベルを付けるべきなら境界印をつけて次の探索候補を見る
                 if (std::abs(nitr->position.z() - ot->position.z()) > diff_) {
                     ot->color = color{ label | border };
                     continue;
                 }
+                // すでに訪問済みならば次の探索候補を見る
+                if (nitr->color.is_valid()) continue;
                 queue.push(nitr);
             }
         }
