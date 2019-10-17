@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <cstddef>
 #include <type_traits>
+#include <algorithm>
 #include "color.hpp"
 #include "ouchilib/utl/multiitr.hpp"
 #include "meta.hpp"
@@ -65,40 +66,44 @@ struct vector {
     /// <summary>
     /// 辞書順に並べたときlhsがrhsより前より来るならばtrue。それ以外はfalse
     /// </summary>
+    template<size_t D>
     [[nodiscard]]
-    friend constexpr bool operator< (const vector& lhs, const vector& rhs) noexcept
+    friend constexpr bool operator< (const vector& lhs, const vector<T, D>& rhs) noexcept
     {
-        for (auto [l, r] : ouchi::multiitr{ lhs.coord, rhs.coord }) {
-            if (l == r) continue;
-            else return l < r;
+        constexpr auto d = std::min(Dim, D);
+        for (auto i = 0; i < d; ++i) {
+            if (lhs.coord[i] == rhs.coord[i]) continue;
+            else return lhs.coord[i] < rhs.coord[i];
         }
         return false;
     }
+    template<size_t D>
     [[nodiscard]]
-    friend constexpr bool operator> (const vector& lhs, const vector& rhs) noexcept
+    friend constexpr bool operator> (const vector& lhs, const vector<T, D>& rhs) noexcept
     {
         return rhs < lhs;
     }
+    template<size_t D>
     [[nodiscard]]
-    friend constexpr bool operator== (const vector& lhs, const vector& rhs) noexcept
+    friend constexpr bool operator== (const vector& lhs, const vector<T, D>& rhs) noexcept
     {
-        for (auto [l, r] : ouchi::multiitr{ lhs.coord, rhs.coord }) {
-            if (l != r) return false;
-        }
-        return true;
+        return !(lhs < rhs) && !(rhs < lhs);
     }
+    template<size_t D>
     [[nodiscard]]
-    friend constexpr bool operator!= (const vector& lhs, const vector& rhs) noexcept
+    friend constexpr bool operator!= (const vector& lhs, const vector<T, D>& rhs) noexcept
     {
         return !(lhs == rhs);
     }
+    template<size_t D>
     [[nodiscard]]
-    friend constexpr bool operator<= (const vector& lhs, const vector& rhs) noexcept
+    friend constexpr bool operator<= (const vector& lhs, const vector<T, D>& rhs) noexcept
     {
         return (lhs < rhs) || (lhs == rhs);
     }
+    template<size_t D>
     [[nodiscard]]
-    friend constexpr bool operator>= (const vector& lhs, const vector& rhs) noexcept
+    friend constexpr bool operator>= (const vector& lhs, const vector<T, D>& rhs) noexcept
     {
         return (lhs > rhs) || (lhs == rhs);
     }
