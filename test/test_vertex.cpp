@@ -34,3 +34,16 @@ OUCHI_TEST_CASE(test_vector_order)
         OUCHI_CHECK_TRUE(v1 > v4);
     }
 }
+
+OUCHI_TEST_CASE(test_vector_operator)
+{
+    gaei::vec3f v{ 1, 1, 1 };
+    gaei::vec2f v2{ 9, 9 };
+    OUCHI_CHECK_EQUAL(v + v2, (gaei::vec3f{ 10, 10, 1 }));
+    OUCHI_CHECK_EQUAL(v + (gaei::vec3f{ 1,1,1 }), (gaei::vec3f{ 2,2,2 }));
+    OUCHI_CHECK_EQUAL(v - (gaei::vec3f{ 1,1,1 }), (gaei::vec3f::zero()));
+
+    OUCHI_CHECK_EQUAL(3 * v, (gaei::vec3f{ 3,3,3 }));
+    OUCHI_CHECK_EQUAL(v * 3, (gaei::vec3f{ 3,3,3 }));
+    OUCHI_CHECK_EQUAL(v / 4, (gaei::vec3f{ 0.25, 0.25, 0.25 }));
+}

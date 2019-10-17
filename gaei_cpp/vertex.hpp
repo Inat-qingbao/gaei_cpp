@@ -63,6 +63,63 @@ struct vector {
     [[nodiscard]]
     static constexpr vector zero() noexcept { return vector{}; }
 
+    friend constexpr vector operator-(const vector& v) noexcept
+    {
+        vector r = v;
+        for (auto& [d, s] : ouchi::multiitr{ r.coord, v.coord })
+            d = -s;
+        return r;
+    }
+
+    template<size_t D>
+    [[nodiscard]]
+    friend constexpr vector<T, std::max(Dim, D)> operator+(const vector& lhs, const vector<T, D>& rhs) noexcept
+    {
+        constexpr auto d = std::min(Dim, D);
+        vector<T, std::max(Dim, D)> r;
+        if constexpr (d != Dim) {
+            r = lhs;
+            for (auto i = 0u; i < d; ++i)
+                r.coord[i] += rhs.coord[i];
+        }
+        else {
+            r = rhs;
+            for (auto i = 0u; i < d; ++i)
+                r.coord[i] += lhs.coord[i];
+        }
+        return r;
+    }
+    template<size_t D>
+    [[nodiscard]]
+    friend constexpr vector<T, std::max(Dim, D)> operator-(const vector& lhs, const vector<T, D>& rhs) noexcept
+    {
+        return lhs + (-rhs);
+    }
+    template<class U>
+    [[nodiscard]]
+    friend constexpr auto operator*(U num, const vector& rhs) noexcept
+    {
+        using nt = std::common_type_t<T, U>;
+        vector<nt, Dim> result;
+        for (auto& [d, s] : ouchi::multiitr{result.coord, rhs.coord}) d = s * num;
+        return result;
+    }
+    template<class U>
+    [[nodiscard]]
+    friend constexpr auto operator*(const vector& rhs, U num) noexcept
+    {
+        return num * rhs;
+    }
+    template<class U>
+    [[nodiscard]]
+    friend constexpr auto operator/(const vector& rhs, U num) noexcept
+    {
+        using nt = std::common_type_t<T, U>;
+        vector<nt, Dim> result;
+        for (auto& [d, s] : ouchi::multiitr{result.coord, rhs.coord}) d = s / num;
+        return result;
+    }
+
     /// <summary>
     /// 辞書順に並べたときlhsがrhsより前より来るならばtrue。それ以外はfalse
     /// </summary>
