@@ -66,7 +66,7 @@ struct vector {
     friend constexpr vector operator-(const vector& v) noexcept
     {
         vector r = v;
-        for (auto& [d, s] : ouchi::multiitr{ r.coord, v.coord })
+        for (auto [d, s] : ouchi::multiitr{ r.coord, v.coord })
             d = -s;
         return r;
     }
@@ -101,7 +101,7 @@ struct vector {
     {
         using nt = std::common_type_t<T, U>;
         vector<nt, Dim> result;
-        for (auto& [d, s] : ouchi::multiitr{result.coord, rhs.coord}) d = s * num;
+        for (auto [d, s] : ouchi::multiitr{result.coord, rhs.coord}) d = s * num;
         return result;
     }
     template<class U>
@@ -116,7 +116,7 @@ struct vector {
     {
         using nt = std::common_type_t<T, U>;
         vector<nt, Dim> result;
-        for (auto& [d, s] : ouchi::multiitr{result.coord, rhs.coord}) d = s / num;
+        for (auto [d, s] : ouchi::multiitr{result.coord, rhs.coord}) d = s / num;
         return result;
     }
 
