@@ -42,4 +42,9 @@ OUCHI_TEST_CASE(test_ssi)
     for (auto i = 0u; i < vvec.size(); ++i) {
         OUCHI_CHECK_EQUAL(vvec.at(i).color.value(), labels[res[i]]);
     }
+    for (auto i = 0; i < sizeof(labels)/sizeof(*labels); ++i) {
+        for (auto j = i + 1; j < sizeof(labels)/sizeof(*labels); ++j) {
+            OUCHI_CHECK_TRUE(labels[i] != labels[j]);
+        }
+    }
 }
