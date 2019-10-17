@@ -1,6 +1,7 @@
 ﻿#pragma once
 #include <cstdint>
 #include <tuple>
+#include <algorithm>
 
 namespace gaei {
 
