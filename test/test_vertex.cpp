@@ -24,4 +24,13 @@ OUCHI_TEST_CASE(test_vector_order)
         OUCHI_CHECK_TRUE(v2 > v1);
         OUCHI_CHECK_TRUE(v1 != v2);
     }
+    {
+        gaei::vec3f v1{ 1, 1, 1 };
+        gaei::vec2f v2{ 1,2 };
+        gaei::vec2f v3{ 1,1 };
+        gaei::vec2f v4{ 1,0 };
+        OUCHI_CHECK_TRUE(v1 < v2);
+        OUCHI_CHECK_EQUAL(v1, v3);
+        OUCHI_CHECK_TRUE(v1 > v4);
+    }
 }
