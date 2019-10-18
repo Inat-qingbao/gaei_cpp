@@ -60,15 +60,17 @@ bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
     std::ofstream of{ path };
     vrml::vrml_writer vw;
     vrml::shape<vrml::point_set, vrml::appearance<>> sp;
-    gaei::surface_structure_isolate ssi;
+    gaei::surface_structure_isolate ssi{ 1 };
     sp.geometry().points.reserve(vs.size());
     // 欠損点をコピーしない
     for (auto& i : vs) {
         if (i.position.z() > -50)
             sp.geometry().points.push_back(i);
     }
-    std::cout << "calclating...\n";
-    ssi(sp.geometry().points);
+    std::cout << "calclating " << sp.geometry().points.size() << " points...\n";
+    std::sort(sp.geometry().points.begin(), sp.geometry().points.end(),
+              [](auto&& a, auto&& b) { return a.position < b.position; });
+    std::cout << "labeled " << ssi(sp.geometry().points) << '\n';
     vw.push(std::move(sp));
     std::cout << "writing to " << path << '\n';
     return vw.write(path);

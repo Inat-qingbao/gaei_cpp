@@ -9,8 +9,14 @@
 
 #include "vertex.hpp"
 #include "color.hpp"
+#include "ouchilib/crypto/algorithm/aes.hpp"
 
 namespace gaei {
+
+std::uint32_t idx_to_color(unsigned int idx) noexcept
+{
+    return 0xFFFFFF & ouchi::crypto::aes128::subword(idx);
+}
 
 class surface_structure_isolate {
 public:
@@ -29,7 +35,7 @@ public:
             not_visited_.insert(it);
         }
         while (not_visited_.size()) {
-            visit(*not_visited_.begin(), vertexes, color++);
+            visit(*not_visited_.begin(), vertexes, idx_to_color(color++));
         }
         return color;
     }
@@ -68,6 +74,7 @@ private:
                 }
                 // すでに訪問済みならば次の探索候補を見る
                 if (nitr->color.is_valid()) continue;
+                nitr->color.validate();
                 queue.push(nitr);
             }
         }
