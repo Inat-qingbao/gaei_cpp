@@ -28,13 +28,38 @@ template<class T, class = void>\
 struct has_member_ ## member_name : std::false_type {};\
 \
 template<class T>\
-struct has_member_ ## member_name<T, std::void_t<decltype(&(T::member_name))>> : std::true_type {};\
+struct has_member_ ## member_name <T, std::void_t<decltype(&T::member_name)>> : std::true_type {};\
 template<class T>\
 inline constexpr bool has_member_ ## member_name ## _v = has_member_ ## member_name <T>::value;
 
+#define GAEI_HAS_OVERLOADED_MEMBER_FUNCTION(func_name)\
+template<class T, class = void>\
+struct has_member_ ## func_name : std::false_type {};\
+template<class T>\
+struct has_member_ ## func_name <T, std::void_t<decltype(std::declval<T&>().func_name())>>\
+    : std::true_type {};\
+template<class T>\
+constexpr bool has_member_ ## func_name ## _v = has_member_ ## func_name ::value;
+
+#define GAEI_HAS_OVERLOADED_MEMBER_FUNCTION_TAKE_ARGS(func_name, ...)\
+template<class T, class = void>\
+struct has_member_ ## func_name : std::false_type {};\
+template<class T>\
+struct has_member_ ## func_name <T, std::void_t<decltype(std::declval<T&>().func_name(__VA_ARGS__))>>\
+    : std::true_type {};\
+template<class T>\
+constexpr bool has_member_ ## func_name ## _v = has_member_ ## func_name ::value;
+
 GAEI_HAS_MEMBER(write)
+GAEI_HAS_OVERLOADED_MEMBER_FUNCTION(begin)
+GAEI_HAS_OVERLOADED_MEMBER_FUNCTION(end)
+GAEI_HAS_MEMBER(cbegin)
+GAEI_HAS_MEMBER(cend)
+GAEI_HAS_MEMBER(size)
 
 #undef GAEI_HAS_MEMBER
+#undef GAEI_HAS_OVERLOADED_MEMBER_FUNCTION
+#undef GAEI_HAS_OVERLOADED_MEMBER_FUNCTION_TAKE_ARGS
 
 #define GAEI_HAS_MEMBER_TYPE(type_name)\
 template<class T, class = void>\
@@ -45,6 +70,8 @@ template<class T>\
 constexpr bool has_ ## type_name ## _v = has_ ## type_name <T>::value;
 
 GAEI_HAS_MEMBER_TYPE(value_type)
+GAEI_HAS_MEMBER_TYPE(iterator)
+GAEI_HAS_MEMBER_TYPE(const_iterator)
 
 #undef GAEI_HAS_MEMBER_TYPE
 

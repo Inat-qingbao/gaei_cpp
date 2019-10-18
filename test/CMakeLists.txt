@@ -34,4 +34,5 @@ add_executable (
 	"test_vec_utl.cpp"
 	"test_vrml_writer.cpp"
     "test_ssi.cpp"
+    "test_linq.cpp"
 )
