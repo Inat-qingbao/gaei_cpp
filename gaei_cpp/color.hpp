@@ -1,5 +1,7 @@
 ﻿#pragma once
 #include <cstdint>
+#include <tuple>
+#include <algorithm>
 
 namespace gaei {
 
@@ -15,6 +17,10 @@ public:
                  static_cast<std::uint32_t>(red) << 16 |
                  static_cast<std::uint32_t>(green) << 8 |
                  static_cast<std::uint32_t>(blue))
+        , is_valid_{ true }
+    {}
+    constexpr color(std::uint32_t value)
+        : value_{ value }
         , is_valid_{ true }
     {}
     constexpr color()
@@ -82,6 +88,24 @@ public:
     friend constexpr bool operator!=(color lhs, color rhs) noexcept
     {
         return !(lhs == rhs);
+    }
+    [[nodiscard]]
+    friend constexpr color operator+(color lhs, color rhs) noexcept
+    {
+        return color(std::min(255u, lhs.r() + rhs.r()),
+                     std::min(255u, lhs.g() + rhs.g()),
+                     std::min(255u, lhs.b() + rhs.b()),
+                     std::min(255u, lhs.a() + rhs.a()));
+    }
+    [[nodiscard]]
+    friend constexpr color operator*(color lhs, color rhs) noexcept
+    {
+        const auto [a, r, g, b] = std::make_tuple(lhs.af() * rhs.af(), lhs.rf() * rhs.rf(),
+                                                  lhs.gf() * rhs.gf(), lhs.bf() * rhs.bf());
+        return color{ static_cast<std::uint8_t>(a * 255),
+                      static_cast<std::uint8_t>(r * 255),
+                      static_cast<std::uint8_t>(g * 255),
+                      static_cast<std::uint8_t>(b * 255) };
     }
 };
 
