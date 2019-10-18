@@ -47,11 +47,19 @@ struct container_traits<T,std::enable_if_t<is_container_v<T> && !is_array_v<T>>>
     {
         return t.cbegin();
     }
+    static const_iterator cbegin(const T& t) noexcept(noexcept(std::declval<T&>().begin()))
+    {
+        return t.cbegin();
+    }
     static iterator end(T& t) noexcept(noexcept(std::declval<T&>().end()))
     {
         return t.end();
     }
     static const_iterator end(const T& t) noexcept(noexcept(std::declval<T&>().end()))
+    {
+        return t.cend();
+    }
+    static const_iterator cend(const T& t) noexcept(noexcept(std::declval<T&>().end()))
     {
         return t.cend();
     }
@@ -71,7 +79,11 @@ struct container_traits<T[S], void> {
     }
     static const_iterator begin(const T(&t)[S]) noexcept
     {
-        return t + S;
+        return t;
+    }
+    static const_iterator cbegin(const T(&t)[S]) noexcept
+    {
+        return begin(t);
     }
     static iterator end(T(&t)[S]) noexcept(noexcept(std::declval<T&>().end()))
     {
@@ -80,6 +92,10 @@ struct container_traits<T[S], void> {
     static const_iterator end(const T(&t)[S]) noexcept(noexcept(std::declval<T&>().end()))
     {
         return t + S;
+    }
+    static iterator cend(const T(&t)[S]) noexcept(noexcept(std::declval<T&>().end()))
+    {
+        return end(t);
     }
 };
 
@@ -90,6 +106,7 @@ class linq {
 public:
     using container_type = remove_cvref_t<T>;
     using value_type = typename container_type::value_type;
+    struct iterator{};
 };
 
 }
