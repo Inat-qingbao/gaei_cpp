@@ -53,6 +53,17 @@ load(const std::vector<std::string>& path)
     return ouchi::result::ok(std::move(ret));
 }
 
+void calc(std::vector<gaei::vertex<>>& vs, float diff)
+{
+    gaei::surface_structure_isolate ssi{ diff };
+    std::cout << "calclating " << vs.size() << " points...\n";
+    std::cout << "sorting..." << std::endl;
+    std::sort(vs.begin(), vs.end(),
+              [](auto&& a, auto&& b) { return a.position < b.position; });
+    std::cout << "labeling points..." << std::endl;
+    std::cout << ssi(vs) << "labels" << std::endl;
+}
+
 bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
            std::string path)
 {
@@ -60,17 +71,12 @@ bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
     std::ofstream of{ path };
     vrml::vrml_writer vw;
     vrml::shape<vrml::point_set, vrml::appearance<>> sp;
-    gaei::surface_structure_isolate ssi{ 1 };
     sp.geometry().points.reserve(vs.size());
     // 欠損点をコピーしない
     for (auto& i : vs) {
         if (i.position.z() > -50)
             sp.geometry().points.push_back(i);
     }
-    std::cout << "calclating " << sp.geometry().points.size() << " points...\n";
-    std::sort(sp.geometry().points.begin(), sp.geometry().points.end(),
-              [](auto&& a, auto&& b) { return a.position < b.position; });
-    std::cout << "labeled " << ssi(sp.geometry().points) << '\n';
     vw.push(std::move(sp));
     std::cout << "writing to " << path << '\n';
     return vw.write(path);
@@ -83,7 +89,8 @@ int main(int argc, const char** const argv)
     po::options_description d;
     d
         .add("", "file or directory to read", po::multi<std::string>)
-        .add("out;o", "name of output file.", po::default_value = "out.wrl"s, po::single<std::string>);
+        .add("out;o", "name of output file.", po::default_value = "out.wrl"s, po::single<std::string>)
+        .add("diff;d", "value for judging surface or not. [m]", po::single<float>, po::default_value = 1.0f);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
@@ -100,8 +107,10 @@ int main(int argc, const char** const argv)
             std::cout << std::hex << (int)i << ' ';
         return -1;
     }
+    auto v = r.unwrap();
+    calc(v, p.get<float>("diff"));
     auto out_path = p.get<std::string>("out");
-    write(r.unwrap(), out_path);
+    write(v, out_path);
     std::cout << "out:" << out_path << std::endl;
 	return 0;
 }
