@@ -93,10 +93,10 @@ int main(int argc, const char** const argv)
     auto beg = chrono::high_resolution_clock::now();
     po::options_description d;
     d
-        .add("", "file or directory to read", po::multi<std::string>)
-        .add("out;o", "name of output file.", po::default_value = "out.wrl"s, po::single<std::string>)
-        .add("diff;d", "value for judging surface or not. [m]", po::single<float>, po::default_value = 1.0f)
-        .add("nooutput;N", "no output", po::flag);
+        .add("", "files or directories to read", po::multi<std::string>)
+        .add("out;o", "a name of output file.", po::default_value = "out.wrl"s, po::single<std::string>)
+        .add("diff;d", "a value for judging surface or not. [m]", po::single<float>, po::default_value = 1.0f)
+        .add("nooutput;N", "this flag restraints file output.", po::flag);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
