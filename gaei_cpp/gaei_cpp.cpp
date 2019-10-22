@@ -7,6 +7,7 @@
 #include <string_view>
 #include <filesystem>
 #include <memory>
+#include <chrono>
 #include "vertex.hpp"
 #include "color.hpp"
 #include "dat_loader.hpp"
@@ -85,7 +86,9 @@ bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
 int main(int argc, const char** const argv)
 {
     namespace po = ouchi::program_options;
+    namespace chrono = std::chrono;
     using namespace std::literals;
+    auto beg = chrono::high_resolution_clock::now();
     po::options_description d;
     d
         .add("", "file or directory to read", po::multi<std::string>)
@@ -94,6 +97,7 @@ int main(int argc, const char** const argv)
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
+    auto parse_time = chrono::high_resolution_clock::now();
     auto in = p.get<std::vector<std::string>>("");
     if (in.size() == 0) {
         std::cout << "少なくとも一つ以上のファイルまたはディレクトリが入力されていなければなりません\n";
@@ -101,6 +105,7 @@ int main(int argc, const char** const argv)
         return -1;
     }    
     auto r = load(in);
+    auto load_time = chrono::high_resolution_clock::now();
     if (!r) {
         std::cout << r.unwrap_err() << std::endl;
         for (auto i : r.unwrap_err())
@@ -109,8 +114,16 @@ int main(int argc, const char** const argv)
     }
     auto v = r.unwrap();
     calc(v, p.get<float>("diff"));
+    auto calc_time = chrono::high_resolution_clock::now();
     auto out_path = p.get<std::string>("out");
     write(v, out_path);
+    auto write_time = chrono::high_resolution_clock::now();
     std::cout << "out:" << out_path << std::endl;
+    std::cout << "elappsed time"
+        << "\nparse\t" << (parse_time - beg).count() / (double)chrono::high_resolution_clock::period::den
+        << "\nload\t" << (load_time - parse_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\ncalc\t" << (calc_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\nwrite\t" << (write_time - calc_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\ntotal\t" << (write_time - beg).count() / (double)chrono::high_resolution_clock::period::den;
 	return 0;
 }
