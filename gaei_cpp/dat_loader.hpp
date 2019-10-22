@@ -6,6 +6,7 @@
 #include <iostream>
 #include <filesystem>
 #include <string_view>
+#include <charconv>
 #include "ouchilib/result/result.hpp"
 #include "ouchilib/tokenizer/tokenizer.hpp"
 #include "ouchilib/utl/translator.hpp"
@@ -78,7 +79,7 @@ public:
     {
         char line[33] = {};
         while (true) {
-            std::memset(line, 0, sizeof(line));
+            //std::memset(line, 0, sizeof(line));
             s.read(line, 32);
             if (s.eof())
                 break;
@@ -96,16 +97,14 @@ private:
         using namespace std::string_literals;
         vec3f pos{};
         std::string buffer; // to reduce memory allocation (MSVC's SSO is up to 15 byte)
-        typename ouchi::translator_between<std::string, float>::type translator;
         unsigned vec_c = 0;
         while (line.size()) {
             auto [tk, it] = sep_(line);
             auto token = line.substr(0, std::distance(line.begin(), it));
             line.remove_prefix(token.size());
             if (tk != ouchi::tokenizer::primitive_token::word) continue;
-            if (auto value = translator.get_value(buffer.assign(token))) {
-                pos.coord[vec_c++] = value.value();
-            } else return ouchi::result::err("cannot translate string into float: "s);
+            if (std::from_chars(token.data(), token.data() + token.size(), pos.coord[vec_c++]).ec != std::errc{})
+                return ouchi::result::err("cannot translate string into float: "s + line.data());
         }
         if (vec_c < 3) return ouchi::result::err("too short line!"s);
         return ouchi::result::ok(vertex<vec3f, color>{pos, colors::none});
