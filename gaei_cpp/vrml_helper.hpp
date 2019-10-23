@@ -16,7 +16,7 @@ namespace gaei::vrml {
 /// 成功した場合書き込んだ文字列の長さ。失敗した場合エラーコード
 /// </returns>
 inline ouchi::result::result<std::size_t, std::errc>
-inline to_vrml(color val, char* first, char* last) noexcept
+to_vrml(color val, char* first, char* last) noexcept
 {
     std::to_chars_result r;
     r = std::to_chars(first, last, val.rf());
@@ -60,7 +60,6 @@ template<class T, size_t S>
 inline ouchi::result::result<std::size_t, std::errc>
 to_vrml(const vector<T, S>& val, char* first, char* last) noexcept
 {
-    std::to_chars_result r;
     return detail::vec_unfold(val, first, last, std::make_index_sequence<S>{});
 }
 
