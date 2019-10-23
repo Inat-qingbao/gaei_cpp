@@ -11,6 +11,7 @@
 #include "color.hpp"
 #include "dat_loader.hpp"
 #include "vrml_writer.hpp"
+#include "surface_structure_isolate.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
 #include "ouchilib/result/result.hpp"
 
@@ -59,13 +60,19 @@ bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
     std::ofstream of{ path };
     vrml::vrml_writer vw;
     vrml::shape<vrml::point_set, vrml::appearance<>> sp;
+    gaei::surface_structure_isolate ssi{ 1 };
     sp.geometry().points.reserve(vs.size());
     // 欠損点をコピーしない
     for (auto& i : vs) {
         if (i.position.z() > -50)
             sp.geometry().points.push_back(i);
     }
+    std::cout << "calclating " << sp.geometry().points.size() << " points...\n";
+    std::sort(sp.geometry().points.begin(), sp.geometry().points.end(),
+              [](auto&& a, auto&& b) { return a.position < b.position; });
+    std::cout << "labeled " << ssi(sp.geometry().points) << '\n';
     vw.push(std::move(sp));
+    std::cout << "writing to " << path << '\n';
     return vw.write(path);
 }
 
@@ -94,7 +101,7 @@ int main(int argc, const char** const argv)
         return -1;
     }
     auto out_path = p.get<std::string>("out");
-    std::cout << "out:" << out_path << std::endl;
     write(r.unwrap(), out_path);
+    std::cout << "out:" << out_path << std::endl;
 	return 0;
 }

@@ -56,6 +56,12 @@ struct remove_cvref {
 template<class T>
 using remove_cvref_t = typename remove_cvref<T>::type;
 
+template<class ...Ts>
+struct overloaded : Ts...{
+    using Ts::operator()...;
+};
+template<class ...Ts>
+overloaded(Ts&& ...)->overloaded<remove_cvref_t<Ts>...>;
 
 }   // namespace detail
 }   // namespace gaei
