@@ -13,6 +13,7 @@
 
 namespace gaei {
 
+// これでカラフルになる
 std::uint32_t idx_to_color(unsigned int idx) noexcept
 {
     return 0xFFFFFF & idx;
@@ -66,16 +67,14 @@ private:
             // 探索は4方向に伸びていく
             for (auto&& dv : d) {
                 vec2f nv = tv + dv;
-                auto [nitr, unused] = std::equal_range(first, last, nv,
-                                                       overloaded{
-                                                       [](const vertex<>& vv, const vec2f& v) {return vv.position < v; },
-                                                       [](const vec2f& v, const vertex<>& vv) {return v < vv.position; }
-                                                       });
-
-                // nvの位置に要素がないならば次の探索候補を見る
-                if (nitr == last) continue;
+                auto nitr = std::lower_bound(first, last, nv,
+                                             overloaded{
+                                             [](const vertex<>& vv, const vec2f& v) {return vv.position < v; },
+                                             [](const vec2f& v, const vertex<>& vv) {return v < vv.position; }
+                                             });
+                // nvの位置に要素がないならば境界印を付けて次の探索候補を見る
                 // nvの位置の要素に別のラベルを付けるべきなら境界印をつけて次の探索候補を見る
-                if (std::abs(nitr->position.z() - ot->position.z()) > diff_) {
+                if (nitr->position != nv || std::abs(nitr->position.z() - ot->position.z()) > diff_) {
                     ot->color = color{ label | border };
                     continue;
                 }

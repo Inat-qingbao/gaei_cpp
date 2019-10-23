@@ -36,7 +36,8 @@ load(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& buf,
     // path is file
     if (p.extension() != ".dat") return ouchi::result::ok(std::monostate{});
     std::cout << "loading " << p.string() << std::endl;
-    buf.reserve(buf.size() + std::filesystem::file_size(p) / 32/* line size */);
+    if(auto size = std::filesystem::file_size(p) >> 5/* / 32*/; buf.capacity() <= size)
+        buf.reserve(9 * size/* line size */);
     gaei::dat_loader dl;
     if (auto r = dl.load(p, buf); !r) return ouchi::result::err(std::string(r.unwrap_err()));
     return ouchi::result::ok(std::monostate{});
@@ -48,8 +49,9 @@ load(const std::vector<std::string>& path)
 {
 
     std::vector<gaei::vertex<gaei::vec3f, gaei::color>> ret;
+    std::filesystem::path fp;
     for (auto&& p : path) {
-        std::filesystem::path fp{ p };
+        fp.assign(p);
         if (auto r = load(ret, fp); !r) return ouchi::result::err(r.unwrap_err());
     }
     return ouchi::result::ok(std::move(ret));
@@ -95,9 +97,10 @@ int main(int argc, const char** const argv)
     auto beg = chrono::high_resolution_clock::now();
     po::options_description d;
     d
-        .add("", "file or directory to read", po::multi<std::string>)
-        .add("out;o", "name of output file.", po::default_value = "out.wrl"s, po::single<std::string>)
-        .add("diff;d", "value for judging surface or not. [m]", po::single<float>, po::default_value = 1.0f);
+        .add("", "files or directories to read", po::multi<std::string>)
+        .add("out;o", "a name of output file.", po::default_value = "out.wrl"s, po::single<std::string>)
+        .add("diff;d", "a value for judging surface or not. [m]", po::single<float>, po::default_value = 1.0f)
+        .add("nooutput;N", "this flag restraints file output.", po::flag);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
@@ -120,7 +123,7 @@ int main(int argc, const char** const argv)
     calc(v, p.get<float>("diff"));
     auto calc_time = chrono::high_resolution_clock::now();
     auto out_path = p.get<std::string>("out");
-    write(v, out_path);
+    if(!p.exist("nooutput"))write(v, out_path);
     auto write_time = chrono::high_resolution_clock::now();
     std::cout << "out:" << out_path << std::endl;
     std::cout << "elappsed time"

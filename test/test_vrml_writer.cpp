@@ -47,3 +47,16 @@ OUCHI_TEST_CASE(test_point_set)
     vw.write(".\\pointset.wrl");
     // テストを書くのが非常にしんどいので表示して確認してくれ！！！！
 }
+
+OUCHI_TEST_CASE(test_transform)
+{
+
+    gaei::vrml::vrml_writer vw;
+    gaei::vrml::shape<gaei::vrml::box, gaei::vrml::appearance<>> box;
+    gaei::vrml::transform t;
+    t.children.push_back(std::make_unique<decltype(box)>(box));
+    t.translation = gaei::vec3f{ 1,3,5 };
+    vw.push(std::move(t));
+    vw.write(".\\boxtransform.wrl");
+    // テストを書くのが非常にしんどいので表示して確認してくれ！！！！
+}
