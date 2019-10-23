@@ -92,10 +92,10 @@ public:
     [[nodiscard]]
     friend constexpr color operator+(color lhs, color rhs) noexcept
     {
-        return color(std::min(255u, lhs.r() + rhs.r()),
-                     std::min(255u, lhs.g() + rhs.g()),
-                     std::min(255u, lhs.b() + rhs.b()),
-                     std::min(255u, lhs.a() + rhs.a()));
+        return color(static_cast<std::uint8_t>(std::min(255u, lhs.r() + rhs.r())),
+                     static_cast<std::uint8_t>(std::min(255u, lhs.g() + rhs.g())),
+                     static_cast<std::uint8_t>(std::min(255u, lhs.b() + rhs.b())),
+                     static_cast<std::uint8_t>(std::min(255u, lhs.a() + rhs.a())));
     }
     [[nodiscard]]
     friend constexpr color operator*(color lhs, color rhs) noexcept
