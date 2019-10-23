@@ -7,6 +7,7 @@
 #include <filesystem>
 #include <variant>  // for std::monostate
 
+#include "vrml_helper.hpp"
 #include "color.hpp"
 #include "vertex.hpp"
 #include "meta.hpp"
@@ -64,7 +65,8 @@ public:
 private:
     bool write_headder(std::ostream& out) const
     {
-        out << "#VRML V2.0 utf8\n";
+        constexpr char header[] = "#VRML V2.0 utf8\n";
+        out.write(header, sizeof(header) - 1);
         return (bool)out;
     }
 };
@@ -240,7 +242,7 @@ struct box {
     bool write(std::ostream& out) const
     {
         constexpr auto c = box{};
-        out << "geometry Box { \n";
+        out << "geometry Box {\n";
         if(size != c.size)
             out << "size " << size.x() << ' '
                 << size.y() << ' '
@@ -254,39 +256,43 @@ struct point_set {
     std::vector<gaei::vertex<gaei::vec3f, gaei::color>> points;
     bool write(std::ostream& out) const
     {
+        std::string buffer;
+        buffer.reserve(points.size() << 6);
         out << "geometry PointSet {\n";
-        auto [unused, color] = write_coord(out);
+        auto [success, color] = write_coord(buffer);
+        std::cout << color << std::endl;
         if (color)
-            write_color(out);
+            success &= write_color(buffer);
+        out.write(buffer.data(), buffer.size());
         out << "}\n";
-        return (bool)out;
+        return (bool)out & success;
     }
 private:
     //return:result, write color? 
     [[nodiscard]]
-    std::tuple<bool, bool> write_coord(std::ostream& out) const
+    std::tuple<bool, bool> write_coord(std::string& out) const
     {
         bool color = false;
-        out << "coord Coordinate {\npoint [\n";
+        bool is_success = true;
+        out.append("coord Coordinate {\npoint [\n");
         for (auto&& i : points) {
-            out << i.position.x() << ' '
-                << i.position.y() << ' '
-                << i.position.z() << '\n';
+            is_success &= to_vrml(i.position, out).is_ok();
+            out.append("\n");
             color |= (bool)i.color;
         }
-        out << "]}\n";
-        return std::make_tuple((bool)out, color);
+        out.append("]}\n");
+        return std::make_tuple(is_success, color);
     }
-    bool write_color(std::ostream& out) const
+    bool write_color(std::string& out) const
     {
-        out << "color Color {\ncolor [\n";
+        bool is_success = true;
+        out.append("color Color {\ncolor [\n");
         for (auto&& i : points) {
-            out << i.color.rf() << ' '
-                << i.color.gf() << ' '
-                << i.color.bf() << '\n';
+            is_success &= to_vrml(i.color, out).is_ok();
+            out.append("\n");
         }
-        out << "]}\n";
-        return (bool)out;
+        out.append("]}\n");
+        return is_success;
     }
 };
 
