@@ -15,7 +15,7 @@ namespace gaei {
 
 std::uint32_t idx_to_color(unsigned int idx) noexcept
 {
-    return 0xFFFFFF & ouchi::crypto::aes128::subword(idx);
+    return 0xFFFFFF & idx;
 }
 
 class surface_structure_isolate {
