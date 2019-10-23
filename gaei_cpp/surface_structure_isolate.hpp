@@ -18,6 +18,11 @@ std::uint32_t idx_to_color(unsigned int idx) noexcept
     return 0xFFFFFF & idx;
 }
 
+unsigned int color_to_idx(std::uint32_t color) noexcept
+{
+    return 0xFFFFFF & color;
+}
+
 class surface_structure_isolate {
 public:
     static constexpr std::uint32_t border = 1u << 31;
