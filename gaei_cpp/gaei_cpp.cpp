@@ -13,6 +13,7 @@
 #include "dat_loader.hpp"
 #include "vrml_writer.hpp"
 #include "surface_structure_isolate.hpp"
+#include "reduce_points.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
 #include "ouchilib/result/result.hpp"
 
@@ -62,7 +63,10 @@ void calc(std::vector<gaei::vertex<>>& vs, float diff)
     std::sort(vs.begin(), vs.end(),
               [](auto&& a, auto&& b) { return a.position < b.position; });
     std::cout << "labeling points..." << std::endl;
-    std::cout << ssi(vs) << "labels" << std::endl;
+    auto label_cnt = ssi(vs);
+    std::cout << label_cnt << "labels" << std::endl;
+    std::cout << "reducing points" << std::endl;
+    gaei::remove_trivial_surface(label_cnt, vs);
 }
 
 bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
