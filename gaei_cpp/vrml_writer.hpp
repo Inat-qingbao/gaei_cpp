@@ -260,7 +260,6 @@ struct point_set {
         buffer.reserve(points.size() << 6);
         out << "geometry PointSet {\n";
         auto [success, color] = write_coord(buffer);
-        std::cout << color << std::endl;
         if (color)
             success &= write_color(buffer);
         out.write(buffer.data(), buffer.size());
