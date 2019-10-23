@@ -34,8 +34,18 @@ to_vrml(color val, char* first, char* last) noexcept
     return ouchi::result::ok(first - r.ptr - 1);
 }
 
+template<size_t InternalBufferLength = 64>
 ouchi::result::result<std::size_t, std::errc>
-to_vrml(vec3f val, char* first, char* last) noexcept
+to_vrml(color& val, std::string& dest)
+{
+    char buffer[InternalBufferLength] = {};
+    auto r = to_vrml(val, buffer, buffer + InternalBufferLength);
+    if(r) dest.append(buffer);
+    return r;
+}
+
+ouchi::result::result<std::size_t, std::errc>
+to_vrml(const vec3f& val, char* first, char* last) noexcept
 {
     std::to_chars_result r;
     assert(first < last);
@@ -51,6 +61,16 @@ to_vrml(vec3f val, char* first, char* last) noexcept
     *(r.ptr) = 0;
     if (r.ec != std::errc{}) return ouchi::result::err(r.ec);
     return ouchi::result::ok(first - r.ptr - 1);
+}
+
+template<size_t InternalBufferLength = 64>
+ouchi::result::result<std::size_t, std::errc>
+to_vrml(const vec3f& val, std::string& dest)
+{
+    char buffer[InternalBufferLength] = {};
+    auto r = to_vrml(val, buffer, buffer + InternalBufferLength);
+    if(r) dest.append(buffer);
+    return r;
 }
 
 }
