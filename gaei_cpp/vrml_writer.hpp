@@ -38,10 +38,10 @@ class vrml_writer {
     std::list<std::unique_ptr<node_base>> nodes_;
 public:
 
-    template<class Node, std::enable_if_t<std::is_base_of_v<node_base, std::remove_reference_t<Node>>, int> = 0>
+    template<class Node, std::enable_if_t<std::is_base_of_v<node_base, remove_cvref_t<Node>>, int> = 0>
     void push(Node&& node)
     {
-        nodes_.push_back(std::make_unique<std::remove_reference_t<Node>>(std::forward<Node>(node)));
+        nodes_.push_back(std::make_unique<remove_cvref_t<Node>>(std::forward<Node>(node)));
     }
     template<class Node, class ...Args, std::enable_if_t<std::is_base_of_v<node_base, Node>, int> = 0>
     void push(Args&& ...args)
