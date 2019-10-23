@@ -23,9 +23,9 @@ constexpr gaei::vertex<> vs[] = {
     {gaei::vec3f{2, 3, 20}, gaei::color{}}
 };
 constexpr unsigned res[] = {
-    3,0,0,2,
-    0,1,1,2,
-    3,0,0,2
+    3,3,3,2,
+    3,1,1,2,
+    3,3,3,2
 };
 
 }

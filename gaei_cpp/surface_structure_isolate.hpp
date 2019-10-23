@@ -61,16 +61,15 @@ private:
             // 探索は4方向に伸びていく
             for (auto&& dv : d) {
                 vec2f nv = tv + dv;
-                auto [nitr, unused] = std::equal_range(first, last, nv,
+                auto [nitr, litr] = std::equal_range(first, last, nv,
                                                        overloaded{
                                                        [](const vertex<>& vv, const vec2f& v) {return vv.position < v; },
                                                        [](const vec2f& v, const vertex<>& vv) {return v < vv.position; }
                                                        });
 
-                // nvの位置に要素がないならば次の探索候補を見る
-                if (nitr == last) continue;
+                // nvの位置に要素がないならば境界印を付けて次の探索候補を見る
                 // nvの位置の要素に別のラベルを付けるべきなら境界印をつけて次の探索候補を見る
-                if (std::abs(nitr->position.z() - ot->position.z()) > diff_) {
+                if (std::abs(nitr->position.z() - ot->position.z()) > diff_ || nitr == litr) {
                     ot->color = color{ label | border };
                     continue;
                 }
