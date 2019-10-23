@@ -79,7 +79,7 @@ bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
             sp.geometry().points.push_back(i);
     }
     vw.push(std::move(sp));
-    std::cout << "writing to " << path << '\n';
+    std::cout << "writing " << vs.size() << " points to " << path << '\n';
     return vw.write(path);
 }
 
