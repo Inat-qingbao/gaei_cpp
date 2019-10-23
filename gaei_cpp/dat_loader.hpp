@@ -96,7 +96,6 @@ private:
     {
         using namespace std::string_literals;
         vec3f pos{};
-        std::string buffer; // to reduce memory allocation (MSVC's SSO is up to 15 byte)
         unsigned vec_c = 0;
         while (line.size()) {
             auto [tk, it] = sep_(line);
