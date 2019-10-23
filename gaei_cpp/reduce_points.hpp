@@ -20,7 +20,7 @@ void remove_trivial_surface(size_t label_size, std::vector<vertex<>>& vs)
 {
     using ssi = surface_structure_isolate;
     auto lc = count_label(label_size, vs);
-    auto max = *std::max_element(lc.begin(), lc.end());
+    auto max = std::distance(lc.cbegin(), std::max_element(lc.cbegin(), lc.cend()));
     vs.erase(std::remove_if(vs.begin(), vs.end(),
                             [max](const vertex<>& v) { return v.color.value() == max; }),
              vs.end());
