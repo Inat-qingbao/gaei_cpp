@@ -36,7 +36,7 @@ to_vrml(color val, char* first, char* last) noexcept
 
 template<size_t InternalBufferLength = 64>
 ouchi::result::result<std::size_t, std::errc>
-to_vrml(color& val, std::string& dest)
+to_vrml(color val, std::string& dest)
 {
     char buffer[InternalBufferLength] = {};
     auto r = to_vrml(val, buffer, buffer + InternalBufferLength);
