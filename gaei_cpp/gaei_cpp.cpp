@@ -13,6 +13,7 @@
 #include "dat_loader.hpp"
 #include "vrml_writer.hpp"
 #include "surface_structure_isolate.hpp"
+#include "reduce_points.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
 #include "ouchilib/result/result.hpp"
 
@@ -56,15 +57,20 @@ load(const std::vector<std::string>& path)
     return ouchi::result::ok(std::move(ret));
 }
 
-void calc(std::vector<gaei::vertex<>>& vs, float diff)
+void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_parser& p)
 {
-    gaei::surface_structure_isolate ssi{ diff };
+    gaei::surface_structure_isolate ssi{ p.get<float>("diff") };
     std::cout << "calclating " << vs.size() << " points...\n";
     std::cout << "sorting..." << std::endl;
     std::sort(vs.begin(), vs.end(),
               [](auto&& a, auto&& b) { return a.position < b.position; });
     std::cout << "labeling points..." << std::endl;
-    std::cout << ssi(vs) << "labels" << std::endl;
+    auto label_cnt = ssi(vs);
+    std::cout << label_cnt << "labels" << std::endl;
+    std::cout << "reducing points" << std::endl;
+    auto lc = gaei::count_label(label_cnt, vs);
+    gaei::remove_trivial_surface(lc, vs);
+    gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
 }
 
 bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
@@ -81,7 +87,7 @@ bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
             sp.geometry().points.push_back(i);
     }
     vw.push(std::move(sp));
-    std::cout << "writing to " << path << '\n';
+    std::cout << "writing " << vs.size() << " points to " << path << '\n';
     return vw.write(path);
 }
 
@@ -93,10 +99,11 @@ int main(int argc, const char** const argv)
     auto beg = chrono::high_resolution_clock::now();
     po::options_description d;
     d
-        .add("", "files or directories to read", po::multi<std::string>)
-        .add("out;o", "a name of output file.", po::default_value = "out.wrl"s, po::single<std::string>)
-        .add("diff;d", "a value for judging surface or not. [m]", po::single<float>, po::default_value = 1.0f)
-        .add("nooutput;N", "this flag restraints file output.", po::flag);
+        .add("", ".datファイルへのパス/.datファイルを含むディレクトリへのパス", po::multi<std::string>)
+        .add("out;o", "出力ファイル", po::default_value = "out.wrl"s, po::single<std::string>)
+        .add("diff;d", "指定された値[m]だけzが異なる点に異なるラベルを付けます", po::single<float>, po::default_value = 1.0f)
+        .add("nooutput;N", "ファイルへの出力を行いません", po::flag)
+        .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = 5ull);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
@@ -116,7 +123,7 @@ int main(int argc, const char** const argv)
         return -1;
     }
     auto v = r.unwrap();
-    calc(v, p.get<float>("diff"));
+    calc(v, p);
     auto calc_time = chrono::high_resolution_clock::now();
     auto out_path = p.get<std::string>("out");
     if(!p.exist("nooutput"))write(v, out_path);
