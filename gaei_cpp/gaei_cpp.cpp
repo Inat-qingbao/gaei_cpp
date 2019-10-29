@@ -69,6 +69,7 @@ void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_par
     std::cout << label_cnt << "labels" << std::endl;
     std::cout << "reducing points" << std::endl;
     auto lc = gaei::count_label(label_cnt, vs);
+    gaei::remove_error_point(vs);
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
 }
