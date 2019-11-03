@@ -14,6 +14,7 @@
 #include "vrml_writer.hpp"
 #include "surface_structure_isolate.hpp"
 #include "reduce_points.hpp"
+#include "normalize.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
 #include "ouchilib/result/result.hpp"
 
@@ -71,6 +72,7 @@ void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_par
     auto lc = gaei::count_label(label_cnt, vs);
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
+    gaei::normalize(vs);
 }
 
 bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,

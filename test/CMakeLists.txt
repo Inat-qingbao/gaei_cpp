@@ -35,4 +35,5 @@ add_executable (
 	"test_vrml_writer.cpp"
     "test_ssi.cpp"
     "test_reduce_points.cpp"
+    "test_normalize.cpp"
 )
