@@ -14,6 +14,7 @@
 #include "vrml_writer.hpp"
 #include "surface_structure_isolate.hpp"
 #include "reduce_points.hpp"
+#include "normalize.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
 #include "ouchilib/result/result.hpp"
 
@@ -72,6 +73,7 @@ void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_par
     auto lc = gaei::count_label(label_cnt, vs);
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
+    gaei::normalize(vs);
 }
 
 bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
@@ -99,7 +101,7 @@ int main(int argc, const char** const argv)
         .add("out;o", "出力ファイル", po::default_value = "out.wrl"s, po::single<std::string>)
         .add("diff;d", "指定された値[m]だけzが異なる点に異なるラベルを付けます", po::single<float>, po::default_value = 1.0f)
         .add("nooutput;N", "ファイルへの出力を行いません", po::flag)
-        .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = 5ull);
+        .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = (size_t)5);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
