@@ -32,5 +32,13 @@ void remove_minor_labels(std::vector<size_t> lc, std::vector<vertex<>>& vs, size
              vs.end());
 }
 
+void remove_error_point(std::vector<vertex<>>& vs) noexcept
+{
+//-9999.99
+    vs.erase(std::remove_if(vs.begin(), vs.end(),
+                            [](const vertex<>& v) { return v.position.z() < -9000; }),
+             vs.end());
+}
+
 
 }
