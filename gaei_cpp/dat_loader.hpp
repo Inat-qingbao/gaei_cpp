@@ -92,7 +92,7 @@ public:
 private:
 
     ouchi::result::result<vertex<vec3f, color>, std::string>
-    load_line(std::string_view line) const
+    load_line(std::string_view line) const noexcept
     {
         using namespace std::string_literals;
         vec3f pos{};
@@ -101,7 +101,7 @@ private:
             auto [tk, it] = sep_(line);
             auto token = line.substr(0, std::distance(line.begin(), it));
             line.remove_prefix(token.size());
-            if (tk != ouchi::tokenizer::primitive_token::word) continue;
+            if (tk == ouchi::tokenizer::primitive_token::separator) continue;
             if (std::from_chars(token.data(), token.data() + token.size(), pos.coord[vec_c++]).ec != std::errc{})
                 return ouchi::result::err("cannot translate string into float: "s + line.data());
         }
