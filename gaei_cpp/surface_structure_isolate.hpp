@@ -21,7 +21,6 @@ constexpr auto abs(T a) noexcept
     return a < 0 ? -a : a;
 }
 
-// これでカラフルになる
 constexpr std::uint32_t idx_to_color(unsigned int idx) noexcept
 {
     return 0xFFFFFF & idx;
