@@ -116,8 +116,6 @@ int main(int argc, const char** const argv)
     auto load_time = chrono::high_resolution_clock::now();
     if (!r) {
         std::cout << r.unwrap_err() << std::endl;
-        for (auto i : r.unwrap_err())
-            std::cout << std::hex << (int)i << ' ';
         return -1;
     }
     auto v = r.unwrap();

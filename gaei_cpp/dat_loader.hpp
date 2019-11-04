@@ -105,7 +105,7 @@ private:
             if (tk == ouchi::tokenizer::primitive_token::separator) continue;
             err = (std::errc)((unsigned)err | (unsigned)std::from_chars(token.data(), token.data() + token.size(), pos.coord[vec_c++]).ec);
         }
-        if (err != std::errc{}) return ouchi::result::err("cannot translate string into float: "s + line.data());
+        if (err != std::errc{}) return ouchi::result::err("cannot translate string into float:"s);
         if (vec_c < 3) return ouchi::result::err("too short line!"s);
         return ouchi::result::ok(vertex<vec3f, color>{pos, colors::none});
     }
