@@ -99,11 +99,6 @@ private:
         std::errc err = std::errc{};
         unsigned vec_c = 0;
         while (line.size()) {
-            //auto [tk, it] = sep_(line);
-            //auto token = line.substr(0, std::distance(line.begin(), it));
-            //line.remove_prefix(token.size());
-            //if (tk == ouchi::tokenizer::primitive_token::separator) continue;
-            //err = (std::errc)((unsigned)err | (unsigned)std::from_chars(token.data(), token.data() + token.size(), pos.coord[vec_c++]).ec);
             auto [p, s] = sep_.find_separator(line);
             if (p == line.begin()) {
                 line.remove_prefix(s);
