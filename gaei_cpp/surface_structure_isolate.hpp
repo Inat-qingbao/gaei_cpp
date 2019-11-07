@@ -9,7 +9,6 @@
 #include <deque>
 #include <queue>
 
-#include "ouchilib/thread/thread-pool.hpp"
 #include "vertex.hpp"
 #include "color.hpp"
 
@@ -39,7 +38,6 @@ public:
     surface_structure_isolate(float diff = 4)
         : not_visited_{}
         , diff_{ diff }
-        , tp_{ 4 }
     {}
     /// <remarks>
     /// vertexesは変更されないが、要素を変更するためconst参照ではない。
@@ -60,7 +58,6 @@ private:
     std::set<std::vector<vertex<>>::iterator> not_visited_;
     std::deque<std::vector<vertex<>>::iterator> queue_;
     float diff_;
-    ouchi::thread::thread_pool tp_;
     static constexpr vec2f d[4] = { {0, -1}, {0, 1}, {1, 0}, {-1, 0} };
 
 
