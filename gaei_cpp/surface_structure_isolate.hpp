@@ -70,8 +70,9 @@ public:
     {
         std::uint32_t color = 0;
         work_space_.reserve(vertexes.size());
+        not_visited_.reserve(vertexes.size());
         for (auto it = vertexes.begin(); it != vertexes.end(); ++it) {
-            work_space_.insert_or_assign({it->position.x(), it->position.y()}, *it).first;
+            work_space_.insert_or_assign({it->position.x(), it->position.y()}, *it);
             not_visited_.insert({ it->position.x(), it->position.y() });
         }
         while (not_visited_.size()) {
