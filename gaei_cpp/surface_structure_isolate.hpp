@@ -26,8 +26,8 @@ struct hash<gaei::vec2f> {
 
     size_t operator()(const gaei::vec2f& v) const noexcept
     {
-        constexpr auto x_shift = 12u;
-        constexpr auto y_shift = 0u;
+        constexpr auto x_shift = 0u;
+        constexpr auto y_shift = 11u;
         return
             ((size_t)(int)v.x() << x_shift) ^
             ((size_t)(int)v.y() << y_shift);
