@@ -198,42 +198,46 @@ class indexed_face_set {
 public:
     bool write(std::ostream& out) const
     {
-        out << "geometry IndexedFaceSet{\n";
-        auto [unused, write] = write_coord(out);
-        write_color(out, write);
+        std::string buffer;
+        bool success = true;
+        buffer.reserve(vertexes_.size() * 64);
+        buffer.append("geometry IndexedFaceSet{\n");
+        auto [s, write] = write_coord(buffer);
+        success &= s;
+        success &= write_color(buffer, write);
         //coord_index add later
-        out << "}\n";
-        return (bool)out;
+        buffer.append("}\n");
+        out.write(buffer.data(), buffer.size());
+        return (bool)out && success;
     }
     auto& data() noexcept { return vertexes_; }
     const auto& data() const noexcept { return vertexes_; }
 private:
-    bool write_color(std::ostream& out, bool write) const
+    bool write_color(std::string& out, bool write) const
     {
         if (!write) return true;
-        out << "color Color{color[";
+        out.append("color Color{color[");
         for (auto&& v : vertexes_) {
-            out << static_cast<float>(v.color.r() / 255.0) << ' '
-                << static_cast<float>(v.color.g() / 255.0) << ' '
-                << static_cast<float>(v.color.b() / 255.0);
-            out << '\n';
+            if (!to_vrml(v.color, out)) return false;
+            out.push_back('\n');
         }
-        out << "]}";
-        return (bool)out;
+        out.append("]}");
+        return true;
     }
     [[nodiscard]]
-    std::tuple<bool, bool> write_coord(std::ostream& out) const
+    std::tuple<bool, bool> write_coord(std::string& out) const
     {
         bool is_color_none = false;
-        out << "coord Coordinate{";
-        out << "point[";
+        out.append("coord Coordinate{");
+        out.append("point[");
         for (const auto& v : vertexes_) {
-            out << v.position.x() << " " << v.position.y() << " " << v.position.z() << '\n';
+            if (!to_vrml(v.position, out)) return { false, false };
+            out.push_back('\n');
             is_color_none |= (bool)v.color;
         }
-        out << "]\n";
-        out << "}\n";
-        return { (bool)out, false };
+        out.append("]\n");
+        out.append("}\n");
+        return { true, is_color_none };
     }
 };
 
