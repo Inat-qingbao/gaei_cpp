@@ -8,19 +8,33 @@
 
 namespace gaei {
 
+namespace detail {
+
+template<class T, class = void>
+struct can_4_operation : std::false_type {};
+template<class T>
+struct can_4_operation<T, std::enable_if_t<
+    detail::is_addable_v<T> &&
+    detail::is_multipliable_v<T> &&
+    detail::is_subtractable_v<T> &&
+    detail::is_divisible_v<T>>
+    > : std::true_type {};
+template<class T>
+constexpr bool can_4_operation_v = can_4_operation<T>::value;
+
+
+} // namespace detail
+
+template<class, std::size_t Dim, class = void>
+struct vector;
+
 /// <summary>
 /// 点を表現します。
 /// </summary>
 /// <typeparam name="T">点の各次元の型</typeparam>
 template<class T, std::size_t Dim>
-struct vector {
+struct vector<T, Dim, std::enable_if_t<(Dim > 0) && can_4_operation_v<T>, void>> {
     // 四則演算が可能か？
-    static_assert(detail::is_addable_v<T> &&
-                  detail::is_multipliable_v<T> &&
-                  detail::is_subtractable_v<T> &&
-                  detail::is_divisible_v<T>);
-    // 次元は0より大きいか？
-    static_assert(Dim > 0);
 
     using value_type = T;
     static constexpr size_t dimension = Dim;

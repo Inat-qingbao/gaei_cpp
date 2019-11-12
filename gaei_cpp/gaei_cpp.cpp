@@ -63,9 +63,6 @@ void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_par
     gaei::surface_structure_isolate ssi{ p.get<float>("diff") };
     std::cout << "calclating " << vs.size() << " points...\n";
     gaei::remove_error_point(vs);
-    std::cout << "sorting..." << std::endl;
-    std::sort(vs.begin(), vs.end(),
-              [](auto&& a, auto&& b) { return a.position < b.position; });
     std::cout << "labeling points..." << std::endl;
     auto label_cnt = ssi(vs);
     std::cout << label_cnt << "labels" << std::endl;
@@ -116,8 +113,6 @@ int main(int argc, const char** const argv)
     auto load_time = chrono::high_resolution_clock::now();
     if (!r) {
         std::cout << r.unwrap_err() << std::endl;
-        for (auto i : r.unwrap_err())
-            std::cout << std::hex << (int)i << ' ';
         return -1;
     }
     auto v = r.unwrap();

@@ -19,7 +19,7 @@ class dat_loader {
     static ouchi::tokenizer::separator<char> init_sep()
     {
         using namespace std::literals;
-        return ouchi::tokenizer::separator<char>(std::in_place, { " "s, "\r\n"s });
+        return ouchi::tokenizer::separator<char>(" \n\r"sv);
     }
 
 public:
@@ -96,15 +96,19 @@ private:
     {
         using namespace std::string_literals;
         vec3f pos{};
+        std::errc err = std::errc{};
         unsigned vec_c = 0;
         while (line.size()) {
-            auto [tk, it] = sep_(line);
-            auto token = line.substr(0, std::distance(line.begin(), it));
+            auto [p, s] = sep_.find_separator(line);
+            if (p == line.begin()) {
+                line.remove_prefix(s);
+                continue;
+            }
+            auto token = line.substr(0, std::distance(line.begin(), p));
             line.remove_prefix(token.size());
-            if (tk == ouchi::tokenizer::primitive_token::separator) continue;
-            if (std::from_chars(token.data(), token.data() + token.size(), pos.coord[vec_c++]).ec != std::errc{})
-                return ouchi::result::err("cannot translate string into float: "s + line.data());
+            err = (std::errc)((unsigned)err | (unsigned)std::from_chars(token.data(), token.data() + token.size(), pos.coord[vec_c++]).ec);
         }
+        if (err != std::errc{}) return ouchi::result::err("cannot translate string into float:"s);
         if (vec_c < 3) return ouchi::result::err("too short line!"s);
         return ouchi::result::ok(vertex<vec3f, color>{pos, colors::none});
     }

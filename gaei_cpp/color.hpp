@@ -12,18 +12,18 @@ public:
     constexpr color(std::uint8_t red,
                     std::uint8_t green,
                     std::uint8_t blue,
-                    std::uint8_t alpha = 0xFF)
+                    std::uint8_t alpha = 0xFF) noexcept
         : value_(static_cast<std::uint32_t>(alpha) << 24 |
                  static_cast<std::uint32_t>(red) << 16 |
                  static_cast<std::uint32_t>(green) << 8 |
                  static_cast<std::uint32_t>(blue))
         , is_valid_{ true }
     {}
-    constexpr color(std::uint32_t value)
+    constexpr color(std::uint32_t value) noexcept
         : value_{ value }
         , is_valid_{ true }
     {}
-    constexpr color()
+    constexpr color() noexcept
         : value_{}
         , is_valid_{ false }
     {}
