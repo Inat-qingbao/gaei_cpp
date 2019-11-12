@@ -200,7 +200,7 @@ public:
     {
         std::string buffer;
         bool success = true;
-        buffer.reserve(vertexes_.size() * 64);
+        buffer.reserve(vertexes_.size() * 128);
         buffer.append("geometry IndexedFaceSet{\n");
         auto [s, write] = write_coord(buffer);
         success &= s;
@@ -261,7 +261,7 @@ struct point_set {
     bool write(std::ostream& out) const
     {
         std::string buffer;
-        buffer.reserve(points.size() << 6);
+        buffer.reserve(points.size() * 64);
         out << "geometry PointSet {\n";
         auto [success, color] = write_coord(buffer);
         if (color)
