@@ -35,7 +35,7 @@ public:
     {
         using namespace std::string_literals;
         std::vector<vertex<vec3f, color>> vertexes;
-        load(path, vertexes);
+        if (auto r = load(path, vertexes); !r) return ouchi::result::err{r.unwrap_err()};
         return ouchi::result::ok(std::move(vertexes));
     }
     ouchi::result::result<std::monostate, std::string>

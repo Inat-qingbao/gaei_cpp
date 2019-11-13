@@ -39,7 +39,7 @@ std::string stream_error_message(const std::ios_base& s)
         : "associated input sequence has reached end-of-file";
 }
 
-ouchi::result::result<std::monostate, std::string> map(const std::ios_base& s)
+ouchi::result::result<std::monostate, std::string> streamtoresult(const std::ios_base& s)
 {
     using namespace std::string_literals;
     using namespace ouchi::result;
@@ -94,7 +94,7 @@ private:
     write_headder(std::ostream& out) const
     {
         using namespace ouchi::result;
-        constexpr char header[] = "#VRML V2.0 utf8\r\n";
+        constexpr char header[] = "#VRML V2.0 utf8\n";
         out.write(header, sizeof(header) - 1);
         if (out.good()) return ok{ std::monostate{} };
         return err{ detail::stream_error_message(out) };
@@ -115,7 +115,7 @@ public:
         out << "Shape{";
         auto r = write_geometry(out);
         r = r && write_appearance(out);
-        r = r && detail::map(out << "}\n");
+        r = r && detail::streamtoresult(out << "}\n");
         return r;
     }
 protected:
@@ -184,6 +184,7 @@ struct material {
                       out, "shininess ", shininess, '\n');
         detail::write_if_different(default_value.transparency, transparency,
                       out, "transparency ", transparency, '\n');
+        out << "}\n";
         return out.good()
             ? ouchi::result::result<std::monostate, std::string>{ouchi::result::ok{ std::monostate{} }}
             : ouchi::result::result<std::monostate, std::string>{ ouchi::result::err{detail::stream_error_message(out)} };
@@ -215,11 +216,11 @@ struct appearance {
     {
         using namespace ouchi::result;
         result<std::monostate, std::string> res = ok{ std::monostate{} };
-        res = res && detail::map(out << "appearance Appearance {\n");
+        res = res && detail::streamtoresult(out << "appearance Appearance {\n");
         res = res && mate.write(out);
         res = res && texture.write(out);
         res = res && transform.write(out);
-        res = res && detail::map(out << "}\n");
+        res = res && detail::streamtoresult(out << "}\n");
         return res;
     }
     template<
@@ -230,9 +231,9 @@ struct appearance {
     {
         using namespace ouchi::result;
         result<std::monostate, std::string> res = ok{ std::monostate{} };
-        res = res && detail::map((out << "appearance Appearance {\n"));
+        res = res && detail::streamtoresult((out << "appearance Appearance {\n"));
         res = res && mate.write(out);
-        res = res && detail::map(out << "}\n");
+        res = res && detail::streamtoresult(out << "}\n");
         return res;
     }
 };
@@ -318,8 +319,8 @@ struct point_set {
         auto [success, color] = write_coord(buffer);
         if (color)
             success = success && write_color(buffer);
-        success = success && detail::map(out.write(buffer.data(), buffer.size()));
-        success = success && detail::map((out << "}\n"));
+        success = success && detail::streamtoresult(out.write(buffer.data(), buffer.size()));
+        success = success && detail::streamtoresult((out << "}\n"));
         return out.good()
             ? ouchi::result::result<std::monostate, std::string>{ouchi::result::ok{ std::monostate{} }}
             : ouchi::result::result<std::monostate, std::string>{ ouchi::result::err{detail::stream_error_message(out)} };
