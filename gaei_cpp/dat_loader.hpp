@@ -34,10 +34,9 @@ public:
     load(const std::filesystem::path& path) const
     {
         using namespace std::string_literals;
-        if (!std::filesystem::exists(path))
-            return ouchi::result::err("no such file or directory"s);
-        std::ifstream s(path, std::ios::binary);
-        return std::move(load(s));
+        std::vector<vertex<vec3f, color>> vertexes;
+        if (auto r = load(path, vertexes); !r) return ouchi::result::err{r.unwrap_err()};
+        return ouchi::result::ok(std::move(vertexes));
     }
     ouchi::result::result<std::monostate, std::string>
     load(const std::filesystem::path& path, std::vector<vertex<vec3f, color>>& dest) const
@@ -45,8 +44,13 @@ public:
         using namespace std::string_literals;
         if (!std::filesystem::exists(path))
             return ouchi::result::err("no such file or directory"s);
-        std::ifstream s(path, std::ios::binary);
-        return std::move(load(s, dest));
+        auto size = std::filesystem::file_size(path);
+        std::ifstream file(path, std::ios::binary);
+        std::string s;
+        s.resize(size);
+        file.read(s.data(), size);
+        
+        return std::move(load_from_memory(s, dest));
     }
     /// <summary>
     /// ストリームからデータを読み取り、パースして点集合を返す。
@@ -79,13 +83,27 @@ public:
     {
         char line[33] = {};
         while (true) {
-            //std::memset(line, 0, sizeof(line));
+            //std::memset(line, 0, /* size of line */);
             s.read(line, 32);
             if (s.eof())
                 break;
             if (auto ver = load_line(line))
                 dest.push_back(ver.unwrap());
             else return ouchi::result::err(ver.unwrap_err() + line);
+        }
+        return ouchi::result::ok(std::monostate{});
+    }
+    ouchi::result::result<std::monostate, std::string>
+    load_from_memory(std::string_view s, std::vector<vertex<vec3f, color>>& dest) const
+    {
+        while (s.size()) {
+            auto lsize = s.find_first_of('\n') + 1;
+            if (lsize == std::string_view::npos) break;
+            std::string_view line = s.substr(0, lsize);
+            s.remove_prefix(lsize);
+            if(auto ver = load_line(line))
+                dest.push_back(ver.unwrap());
+            else return ouchi::result::err(ver.unwrap_err() + line.data());
         }
         return ouchi::result::ok(std::monostate{});
     }

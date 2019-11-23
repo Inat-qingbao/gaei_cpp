@@ -7,8 +7,8 @@ namespace {
 
 constexpr std::string_view correct_indexed_face_set =
 "geometry IndexedFaceSet{\n"
-"coord Coordinate{point[0 0 0\n"
-"1 1 1\n"
+"coord Coordinate{point[0 0 0 \n"
+"1 1 1 \n"
 "]\n"
 "}\n"
 "}\n";

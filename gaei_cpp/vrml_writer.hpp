@@ -12,6 +12,8 @@
 #include "vertex.hpp"
 #include "meta.hpp"
 
+#include "ouchilib/result/result.hpp"
+
 namespace gaei::vrml {
 
 namespace detail {
@@ -27,11 +29,33 @@ bool write_if_different(const T& default_value,
     (out << ... << pt);
     return true;
 }
+
+std::string stream_error_message(const std::ios_base& s)
+{
+    using namespace std::string_literals;
+    return s.good() ? ""
+        : s.bad() ? "irrecoverable stream error!"
+        : s.fail() ? "input/output operation failed! (formatting or extraction error)"
+        : "associated input sequence has reached end-of-file";
+}
+
+ouchi::result::result<std::monostate, std::string> streamtoresult(const std::ios_base& s)
+{
+    using namespace std::string_literals;
+    using namespace ouchi::result;
+    using res = ouchi::result::result<std::monostate, std::string>;
+    return s.good() ? res{ ok{ std::monostate{} } }
+        : s.bad() ? res{ err{ "irrecoverable stream error!" } }
+        : s.fail() ? res{ err{"input/output operation failed! (formatting or extraction error)"} }
+        : res{ err{ "associated input sequence has reached end-of-file" } };
+}
+
 }// namespace detail
 
 struct node_base {
     virtual ~node_base() = default;
-    virtual bool write(std::ostream& out) const = 0;
+    virtual ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const = 0;
 };
 
 class vrml_writer {
@@ -51,23 +75,29 @@ public:
     auto& data() noexcept { return nodes_; }
     const auto& data() const noexcept { return nodes_; }
 
-    bool write(std::ostream& out) const noexcept
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const noexcept
     {
-        write_headder(out);
-        for (auto& i : nodes_) i->write(out);
-        return (bool)out;
+        using namespace ouchi::result;
+        auto r = write_headder(out);
+        for (auto& i : nodes_) r = r && i->write(out);
+        return r;
     }
-    bool write(const std::filesystem::path& path) const noexcept
+    ouchi::result::result<std::monostate, std::string>
+    write(const std::filesystem::path& path) const noexcept
     {
         std::ofstream out(path);
         return write(out);
     }
 private:
-    bool write_headder(std::ostream& out) const
+    ouchi::result::result<std::monostate, std::string>
+    write_headder(std::ostream& out) const
     {
+        using namespace ouchi::result;
         constexpr char header[] = "#VRML V2.0 utf8\n";
         out.write(header, sizeof(header) - 1);
-        return (bool)out;
+        if (out.good()) return ok{ std::monostate{} };
+        return err{ detail::stream_error_message(out) };
     }
 };
 
@@ -78,19 +108,23 @@ public:
     shape_base() = default;
 
     // 外(主にvrml_writer)から呼び出されてshapeノードを出力する関数
-    virtual bool write(std::ostream& out) const override
+    virtual 
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const override
     {
         out << "Shape{";
-        write_geometry(out);
-        write_appearance(out);
-        out << "}\n";
-        return (bool)out;
+        auto r = write_geometry(out);
+        r = r && write_appearance(out);
+        r = r && detail::streamtoresult(out << "}\n");
+        return r;
     }
 protected:
     // 継承先の具体的な`shape`から呼び出されてGeometryノード(IndexedFaceSetやBoxなど)を書き込む純粋仮想関数
-    virtual bool write_geometry(std::ostream& out) const = 0;
+    virtual ouchi::result::result<std::monostate, std::string>
+    write_geometry(std::ostream& out) const = 0;
     // 継承先の具体的な`shape`から呼び出されてAppearanceノードを書き込む純粋仮想関数
-    virtual bool write_appearance(std::ostream& out) const = 0;
+    virtual ouchi::result::result<std::monostate, std::string>
+    write_appearance(std::ostream& out) const = 0;
 };
 
 template<class Geometry, class Appearance>
@@ -106,15 +140,15 @@ public:
     Appearance& appearance() noexcept { return appearance_; }
     const Appearance& appearance() const noexcept { return appearance_; }
 protected:
-    virtual bool write_geometry(std::ostream& out) const override
+    ouchi::result::result<std::monostate, std::string>
+    write_geometry(std::ostream& out) const override
     {
-        geometry_.write(out);
-        return (bool)out;
+        return geometry_.write(out);
     }
-    virtual bool write_appearance(std::ostream& out) const override
+    ouchi::result::result<std::monostate, std::string>
+    write_appearance(std::ostream& out) const override
     {
-        appearance_.write(out);
-        return (bool)out;
+        return appearance_.write(out);
     }
 };
 
@@ -125,31 +159,35 @@ struct material {
     float shininess = 0.2f;
     color emissive_color = colors::none;
     float transparency = 0;
-    bool write(std::ostream& out) const
+
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const
     {
         constexpr auto default_value = material{};
         out << "material Material {";
         detail::write_if_different(default_value.ambient_intensity,
-                                   ambient_intensity,
-                                   out, "ambientIntensity ", ambient_intensity, '\n');
+                      ambient_intensity,
+                      out, "ambientIntensity ", ambient_intensity, '\n');
         detail::write_if_different(default_value.diffuse_color,
-                                   diffuse_color,
-                                   out, "diffuseColor ",
-                                   diffuse_color.rf(), diffuse_color.gf(), diffuse_color.bf(), '\n');
+                      diffuse_color,
+                      out, "diffuseColor ",
+                      diffuse_color.rf(), diffuse_color.gf(), diffuse_color.bf(), '\n');
         detail::write_if_different(default_value.specular_color,
-                                   specular_color,
-                                   out, "specularColor ",
-                                   specular_color.rf(), specular_color.gf(), specular_color.bf(), '\n');
+                      specular_color,
+                      out, "specularColor ",
+                      specular_color.rf(), specular_color.gf(), specular_color.bf(), '\n');
         detail::write_if_different(default_value.emissive_color,
-                                   emissive_color,
-                                   out, "emissiveColor ",
-                                   emissive_color.rf(), emissive_color.gf(), emissive_color.bf(), '\n');
+                      emissive_color,
+                      out, "emissiveColor ",
+                      emissive_color.rf(), emissive_color.gf(), emissive_color.bf(), '\n');
         detail::write_if_different(default_value.shininess, shininess,
-                                   out, "shininess ", shininess, '\n');
+                      out, "shininess ", shininess, '\n');
         detail::write_if_different(default_value.transparency, transparency,
-                                   out, "transparency ", transparency, '\n');
+                      out, "transparency ", transparency, '\n');
         out << "}\n";
-        return (bool)out;
+        return out.good()
+            ? ouchi::result::result<std::monostate, std::string>{ouchi::result::ok{ std::monostate{} }}
+            : ouchi::result::result<std::monostate, std::string>{ ouchi::result::err{detail::stream_error_message(out)} };
     }
 };
 
@@ -158,9 +196,10 @@ struct texture_transform {
     float rotation = 0;
     vec2f scale = { 1, 1 };
     vec2f translation = { 0, 0 };
-    bool write([[maybe_unused]] std::ostream& out) const
+    ouchi::result::result<std::monostate, std::string>
+    write([[maybe_unused]] std::ostream& out) const
     {
-        return false;
+        return ouchi::result::ok{ std::monostate{} };
     }
 };
 
@@ -172,74 +211,89 @@ struct appearance {
     template<
         class T = Texture,
         std::enable_if_t<gaei::detail::has_member_write_v<T>>* = nullptr>
-        bool write(std::ostream& out) const
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const
     {
-        out << "appearance Appearance {\n";
-        mate.write(out);
-        texture.write(out);
-        transform.write(out);
-        out << "}\n";
-        return (bool)out;
+        using namespace ouchi::result;
+        result<std::monostate, std::string> res = ok{ std::monostate{} };
+        res = res && detail::streamtoresult(out << "appearance Appearance {\n");
+        res = res && mate.write(out);
+        res = res && texture.write(out);
+        res = res && transform.write(out);
+        res = res && detail::streamtoresult(out << "}\n");
+        return res;
     }
     template<
         class T = Texture,
         std::enable_if_t<! gaei::detail::has_member_write_v<T>>* = nullptr>
-    bool write(std::ostream& out) const
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const
     {
-        out << "appearance Appearance {\n";
-        mate.write(out);
-        out << "}\n";
-        return (bool)out;
+        using namespace ouchi::result;
+        result<std::monostate, std::string> res = ok{ std::monostate{} };
+        res = res && detail::streamtoresult((out << "appearance Appearance {\n"));
+        res = res && mate.write(out);
+        res = res && detail::streamtoresult(out << "}\n");
+        return res;
     }
 };
 
 class indexed_face_set {
     std::vector<gaei::vertex<gaei::vec3f, gaei::color>> vertexes_;
 public:
-    bool write(std::ostream& out) const
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const
     {
-        out << "geometry IndexedFaceSet{\n";
-        auto [unused, write] = write_coord(out);
-        write_color(out, write);
+        std::string buffer;
+        ouchi::result::result<std::monostate, std::string> success = ouchi::result::ok{ std::monostate{} };
+        buffer.reserve(vertexes_.size() * 128);
+        buffer.append("geometry IndexedFaceSet{\n");
+        auto [s, write] = write_coord(buffer);
+        success = success && s;
+        success = success && write_color(buffer, write);
         //coord_index add later
-        out << "}\n";
-        return (bool)out;
+        buffer.append("}\n");
+        out.write(buffer.data(), buffer.size());
+        return success
+            ? ouchi::result::result<std::monostate, std::string>{ouchi::result::ok{ std::monostate{} }}
+            : ouchi::result::result<std::monostate, std::string>{ ouchi::result::err{detail::stream_error_message(out)} };
     }
     auto& data() noexcept { return vertexes_; }
     const auto& data() const noexcept { return vertexes_; }
 private:
-    bool write_color(std::ostream& out, bool write) const
+    ouchi::result::result<std::monostate, std::string>
+    write_color(std::string& out, bool write) const
     {
-        if (!write) return true;
-        out << "color Color{color[";
+        if (!write) return ouchi::result::ok{ std::monostate{} };
+        out.append("color Color{color[");
         for (auto&& v : vertexes_) {
-            out << static_cast<float>(v.color.r() / 255.0) << ' '
-                << static_cast<float>(v.color.g() / 255.0) << ' '
-                << static_cast<float>(v.color.b() / 255.0);
-            out << '\n';
+            if (auto r = to_vrml(v.color, out); !r) return ouchi::result::err{std::make_error_code(r.unwrap_err()).message()};
+            out.push_back('\n');
         }
-        out << "]}";
-        return (bool)out;
+        out.append("]}");
+        return ouchi::result::ok{ std::monostate{} };
     }
     [[nodiscard]]
-    std::tuple<bool, bool> write_coord(std::ostream& out) const
+    std::tuple<ouchi::result::result<std::monostate, std::string>, bool> write_coord(std::string& out) const
     {
         bool is_color_none = false;
-        out << "coord Coordinate{";
-        out << "point[";
+        out.append("coord Coordinate{");
+        out.append("point[");
         for (const auto& v : vertexes_) {
-            out << v.position.x() << " " << v.position.y() << " " << v.position.z() << '\n';
+            if (auto r = to_vrml(v.position, out); !r) return { ouchi::result::err{std::make_error_code(r.unwrap_err()).message()}, false };
+            out.push_back('\n');
             is_color_none |= (bool)v.color;
         }
-        out << "]\n";
-        out << "}\n";
-        return { (bool)out, false };
+        out.append("]\n");
+        out.append("}\n");
+        return { ouchi::result::ok{ std::monostate{} }, is_color_none };
     }
 };
 
 struct box {
     vec3f size = { 2,2,2 };
-    bool write(std::ostream& out) const
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const
     {
         constexpr auto c = box{};
         out << "geometry Box {\n";
@@ -248,46 +302,52 @@ struct box {
                 << size.y() << ' '
                 << size.z() << '\n';
         out << "}\n";
-        return (bool)out;
+        return out.good()
+            ? ouchi::result::result<std::monostate, std::string>{ouchi::result::ok{ std::monostate{} }}
+            : ouchi::result::result<std::monostate, std::string>{ ouchi::result::err{detail::stream_error_message(out)} };
     }
 };
 
 struct point_set {
     std::vector<gaei::vertex<gaei::vec3f, gaei::color>> points;
-    bool write(std::ostream& out) const
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const
     {
         std::string buffer;
-        buffer.reserve(points.size() << 6);
+        buffer.reserve(points.size() * 64);
         out << "geometry PointSet {\n";
         auto [success, color] = write_coord(buffer);
         if (color)
-            success &= write_color(buffer);
-        out.write(buffer.data(), buffer.size());
-        out << "}\n";
-        return (bool)out & success;
+            success = success && write_color(buffer);
+        success = success && detail::streamtoresult(out.write(buffer.data(), buffer.size()));
+        success = success && detail::streamtoresult((out << "}\n"));
+        return out.good()
+            ? ouchi::result::result<std::monostate, std::string>{ouchi::result::ok{ std::monostate{} }}
+            : ouchi::result::result<std::monostate, std::string>{ ouchi::result::err{detail::stream_error_message(out)} };
     }
 private:
     //return:result, write color? 
     [[nodiscard]]
-    std::tuple<bool, bool> write_coord(std::string& out) const
+    std::tuple<ouchi::result::result<std::monostate, std::string>, bool> write_coord(std::string& out) const
     {
         bool color = false;
-        bool is_success = true;
+        ouchi::result::result<std::monostate, std::string> is_success = ouchi::result::ok{ std::monostate{} };
         out.append("coord Coordinate {\npoint [\n");
         for (auto&& i : points) {
-            is_success &= to_vrml(i.position, out).is_ok();
+            is_success = is_success && to_vrml(i.position, out).map([](auto)->std::monostate {return {}; }).map_err([](std::errc c) {return std::make_error_code(c).message(); });
             out.append("\n");
             color |= (bool)i.color;
         }
         out.append("]}\n");
         return std::make_tuple(is_success, color);
     }
-    bool write_color(std::string& out) const
+    ouchi::result::result<std::monostate, std::string>
+    write_color(std::string& out) const
     {
-        bool is_success = true;
+        ouchi::result::result<std::monostate, std::string> is_success = ouchi::result::ok{ std::monostate{} };
         out.append("color Color {\ncolor [\n");
         for (auto&& i : points) {
-            is_success &= to_vrml(i.color, out).is_ok();
+            is_success = is_success && to_vrml(i.color, out).map([](auto)->std::monostate {return {}; }).map_err([](std::errc c) {return std::make_error_code(c).message(); });
             out.append("\n");
         }
         out.append("]}\n");
@@ -295,7 +355,9 @@ private:
     }
 };
 
-struct transform : public node_base {
+struct [[deprecated("not safe because error handling is not satisfied. there is no substitute")]]
+    transform : public node_base
+{
     vec3f translation = { 0, 0, 0 };
     vector<float, 4> rotation = { 1, 0, 0, 0 };
     vec3f scale = { 1, 1, 1 };
@@ -303,7 +365,8 @@ struct transform : public node_base {
     vec3f bbox_center = { 0,0,0 };
     vec3f bbox_size = { -1, -1, -1 };
     std::list<std::unique_ptr<node_base>> children;
-    bool write(std::ostream& out) const override
+    ouchi::result::result<std::monostate, std::string>
+    write(std::ostream& out) const override
     {
         out << "Transform {\n";
         out << "translation "
@@ -334,10 +397,12 @@ struct transform : public node_base {
             << bbox_size.z() << '\n';
         out << "children [\n";
         for (const auto& i : children) {
-            i->write(out);
+            (void)(i->write(out));
         }
         out << "]\n}\n";
-        return (bool)out;
+        return out.good()
+            ? ouchi::result::result<std::monostate, std::string>{ouchi::result::ok{ std::monostate{} }}
+            : ouchi::result::result<std::monostate, std::string>{ ouchi::result::err{detail::stream_error_message(out)} };
     }
 };
 

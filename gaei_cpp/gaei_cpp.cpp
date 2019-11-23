@@ -73,11 +73,11 @@ void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_par
     gaei::normalize(vs);
 }
 
-bool write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
+ouchi::result::result<std::monostate, std::string>
+write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
            std::string path)
 {
     namespace vrml = gaei::vrml;
-    std::ofstream of{ path };
     vrml::vrml_writer vw;
     vrml::shape<vrml::point_set, vrml::appearance<>> sp;
     sp.geometry().points.assign(vs.begin(), vs.end());
@@ -119,7 +119,7 @@ int main(int argc, const char** const argv)
     calc(v, p);
     auto calc_time = chrono::high_resolution_clock::now();
     auto out_path = p.get<std::string>("out");
-    if(!p.exist("nooutput"))write(v, out_path);
+    if (!p.exist("nooutput"))write(v, out_path).unwrap_or_else([](auto e)->std::monostate {std::cout << e; return {}; });
     auto write_time = chrono::high_resolution_clock::now();
     std::cout << "out:" << out_path << std::endl;
     std::cout << "elappsed time"
