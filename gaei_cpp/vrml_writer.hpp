@@ -252,9 +252,10 @@ public:
         ouchi::result::result<std::monostate, std::string> success = ouchi::result::ok{ std::monostate{} };
         buffer.reserve(coord_.size() * 128);
         buffer.append("geometry IndexedFaceSet{\n");
-        buffer.append("ccw "); buffer.append(ccw ? "TRUE" : "FALSE");
-        buffer.append("convex ");buffer.append(convex ? "TRUE" : "FALSE");
-        buffer.append("solid ");buffer.append(solid ? "TRUE" : "FALSE");
+        buffer.append("\nccw "); buffer.append(ccw ? "TRUE" : "FALSE");
+        buffer.append("\nconvex ");buffer.append(convex ? "TRUE" : "FALSE");
+        buffer.append("\nsolid ");buffer.append(solid ? "TRUE" : "FALSE");
+        buffer.append("\n");
         auto [s, write] = write_coord(buffer);
         success = success && s;
         success = success && write_color(buffer, write);
@@ -292,14 +293,15 @@ private:
             is_color_none |= (bool)v.color;
         }
         out.append("]\n");
-        out.append("coordIndex [");
+        out.append("}\n");
+        out.append("coordIndex [\n");
         for(auto&& idx : coord_index_){
             char buffer[16] = {};
             std::to_chars(buffer, buffer+16, idx);
             out.append(buffer);
+            out.push_back(' ');
         }
         out.append("]");
-        out.append("}\n");
         return { ouchi::result::ok{ std::monostate{} }, is_color_none };
     }
 };
