@@ -9,12 +9,15 @@
 #include <memory>
 #include <chrono>
 #include "vertex.hpp"
+#include "vector_utl.hpp"
 #include "color.hpp"
 #include "dat_loader.hpp"
 #include "vrml_writer.hpp"
 #include "surface_structure_isolate.hpp"
 #include "reduce_points.hpp"
 #include "normalize.hpp"
+
+#include "ouchilib/geometry/triangulation.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
 #include "ouchilib/result/result.hpp"
 
@@ -58,7 +61,7 @@ load(const std::vector<std::string>& path)
     return ouchi::result::ok(std::move(ret));
 }
 
-void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_parser& p)
+void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_parser& p)
 {
     gaei::surface_structure_isolate ssi{ p.get<float>("diff") };
     std::cout << "calclating " << vs.size() << " points...\n";
@@ -72,15 +75,28 @@ void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_par
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
     gaei::normalize(vs);
 }
+std::vector<std::array<size_t, 3>> triangulate(const std::vector<gaei::vertex<>>& vs)
+{
+    std::cout << "triangulate " << vs.size() << " points";
+    ouchi::geometry::triangulation<gaei::vertex<>, 5000> t;
+    return t(vs.cbegin(), vs.cend(), t.return_as_idx);
+}
 
 ouchi::result::result<std::monostate, std::string>
 write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
-           std::string path)
+      const std::vector<std::array<size_t, 3>>& tri,
+      std::string path)
 {
     namespace vrml = gaei::vrml;
     vrml::vrml_writer vw;
-    vrml::shape<vrml::point_set, vrml::appearance<>> sp;
-    sp.geometry().points.assign(vs.begin(), vs.end());
+    vrml::shape<vrml::indexed_face_set, vrml::appearance<>> sp;
+    sp.geometry().coord_.assign(vs.begin(), vs.end());
+    for (auto& f : tri) {
+        for (auto idx : f) {
+            sp.geometry().coord_index_.push_back(idx);
+        }
+        sp.geometry().coord_index_.push_back(-1);
+    }
     vw.push(std::move(sp));
     std::cout << "writing " << vs.size() << " points to " << path << '\n';
     return vw.write(path);
@@ -116,17 +132,20 @@ int main(int argc, const char** const argv)
         return -1;
     }
     auto v = r.unwrap();
-    calc(v, p);
-    auto calc_time = chrono::high_resolution_clock::now();
+    label(v, p);
+    auto label_time = chrono::high_resolution_clock::now();
+    auto tri = triangulate(v);
+    auto tri_time = chrono::high_resolution_clock::now();
     auto out_path = p.get<std::string>("out");
-    if (!p.exist("nooutput"))write(v, out_path).unwrap_or_else([](auto e)->std::monostate {std::cout << e; return {}; });
+    if (!p.exist("nooutput"))write(v, tri,out_path).unwrap_or_else([](auto e)->std::monostate {std::cout << e; return {}; });
     auto write_time = chrono::high_resolution_clock::now();
     std::cout << "out:" << out_path << std::endl;
     std::cout << "elappsed time"
         << "\nparse\t" << (parse_time - beg).count() / (double)chrono::high_resolution_clock::period::den
         << "\nload\t" << (load_time - parse_time).count() / (double)chrono::high_resolution_clock::period::den
-        << "\ncalc\t" << (calc_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
-        << "\nwrite\t" << (write_time - calc_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\nlabel\t" << (label_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\ntri\t" << (tri_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\nwrite\t" << (tri_time - label_time).count() / (double)chrono::high_resolution_clock::period::den
         << "\ntotal\t" << (write_time - beg).count() / (double)chrono::high_resolution_clock::period::den;
 	return 0;
 }
