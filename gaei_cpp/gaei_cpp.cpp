@@ -77,7 +77,7 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
 }
 std::vector<std::array<size_t, 3>> triangulate(const std::vector<gaei::vertex<>>& vs)
 {
-    std::cout << "triangulate " << vs.size() << " points";
+    std::cout << "triangulate " << vs.size() << " points\n";
     ouchi::geometry::triangulation<gaei::vertex<>, 1000> t;
     return t(vs.cbegin(), vs.cend(), t.return_as_idx);
 }
