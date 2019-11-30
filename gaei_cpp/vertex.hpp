@@ -179,8 +179,8 @@ struct vector<T, Dim, std::enable_if_t<(Dim > 0) && can_4_operation_v<T>, void>>
     }
 };
 
-using vec2f = vector<float, 2>;
-using vec3f = vector<float, 3>;
+using vec2f = vector<double, 2>;
+using vec3f = vector<double, 3>;
 
 template<class PosT = vec3f, class ColorT = color>
 struct vertex {

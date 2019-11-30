@@ -19,8 +19,8 @@
 
 namespace std {
 
-template<>
-struct hash<gaei::vec2f> {
+template<class T, size_t Dim>
+struct hash<gaei::vector<T, Dim>> {
     typedef size_t result_type;
     typedef gaei::vec2f argument_type;
 
