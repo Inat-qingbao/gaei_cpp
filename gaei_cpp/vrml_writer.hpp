@@ -239,7 +239,7 @@ struct appearance {
 };
 
 struct indexed_face_set {
-    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> coord_;
+    std::vector<gaei::vertex<>> coord_;
     std::vector<long> coord_index_;
     bool ccw = true;
     bool convex = false;
@@ -325,7 +325,7 @@ struct box {
 };
 
 struct point_set {
-    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> points;
+    std::vector<gaei::vertex<>> points;
     ouchi::result::result<std::monostate, std::string>
     write(std::ostream& out) const
     {

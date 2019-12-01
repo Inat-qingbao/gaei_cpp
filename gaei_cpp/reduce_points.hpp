@@ -1,6 +1,9 @@
 ﻿#pragma once
 #include <vector>
 #include <algorithm>
+
+#include <iostream>
+
 #include "ouchilib/thread/thread-pool.hpp"
 #include "vertex.hpp"
 #include "surface_structure_isolate.hpp"
@@ -35,10 +38,20 @@ inline void remove_minor_labels(std::vector<size_t> lc, std::vector<vertex<>>& v
 inline void remove_error_point(std::vector<vertex<>>& vs) noexcept
 {
 //-9999.99
+    auto b = vs.size();
     vs.erase(std::remove_if(vs.begin(), vs.end(),
                             [](const vertex<>& v) { return v.position.z() < -9000; }),
              vs.end());
+    std::cout << "removed error:" << b - vs.size() << '\n';
 }
 
+inline void thinout(std::vector<vertex<>>& vs) noexcept
+{
+    std::sort(vs.begin(), vs.end(),
+              [](auto&& a, auto&& b) {return a.position < b.position; });
+    vs.erase(std::remove_if(vs.begin(), vs.end(),
+                            [idx = 0u](const vertex<>& v) mutable {return idx++ & 0b11; }),
+             vs.end());
+}
 
 }

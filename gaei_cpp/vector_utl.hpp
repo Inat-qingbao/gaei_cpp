@@ -12,7 +12,8 @@ T sqdistance(const vector<T, Dim>& a,
     using std::pow, std::sqrt;
     T sum{};
     for (auto i = 0u; i < Dim; ++i) {
-        sum += static_cast<T>(pow(a.coord[i] - b.coord[i], 2));
+        auto c = a.coord[i] - b.coord[i];
+        sum += c * c;
     }
     return sum;
 }
@@ -25,12 +26,7 @@ T distance(const vector<T, Dim>& a,
            const vector<T, Dim>& b)
     noexcept
 {
-    using std::pow, std::sqrt;
-    T sum{};
-    for (auto i = 0u; i < Dim; ++i) {
-        sum += static_cast<T>(pow(a.coord[i] - b.coord[i], 2));
-    }
-    return static_cast<T>(sqrt(sum));
+    return static_cast<T>(sqrt(sqdistance(a, b)));
 }
 
 // ベクトルaとbの内積

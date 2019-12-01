@@ -23,7 +23,7 @@
 
 [[nodiscard]]
 ouchi::result::result<std::monostate, std::string>
-load(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& buf,
+load(std::vector<gaei::vertex<>>& buf,
      const std::filesystem::path& p)
 {
     using namespace std::string_literals;
@@ -48,11 +48,11 @@ load(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& buf,
 }
 
 [[nodiscard]]
-ouchi::result::result<std::vector<gaei::vertex<gaei::vec3f, gaei::color>>, std::string>
+ouchi::result::result<std::vector<gaei::vertex<>>, std::string>
 load(const std::vector<std::string>& path)
 {
 
-    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> ret;
+    std::vector<gaei::vertex<>> ret;
     std::filesystem::path fp;
     for (auto&& p : path) {
         fp.assign(p);
@@ -73,6 +73,7 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     auto lc = gaei::count_label(label_cnt, vs);
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
+    gaei::thinout(vs);
     gaei::normalize(vs);
 }
 std::vector<std::array<size_t, 3>> triangulate(const std::vector<gaei::vertex<>>& vs)
@@ -83,7 +84,7 @@ std::vector<std::array<size_t, 3>> triangulate(const std::vector<gaei::vertex<>>
 }
 
 ouchi::result::result<std::monostate, std::string>
-write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
+write(const std::vector<gaei::vertex<>>& vs,
       const std::vector<std::array<size_t, 3>>& tri,
       std::string path)
 {
@@ -145,7 +146,7 @@ int main(int argc, const char** const argv)
         << "\nload\t" << (load_time - parse_time).count() / (double)chrono::high_resolution_clock::period::den
         << "\nlabel\t" << (label_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
         << "\ntri\t" << (tri_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
-        << "\nwrite\t" << (tri_time - label_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\nwrite\t" << (write_time - tri_time).count() / (double)chrono::high_resolution_clock::period::den
         << "\ntotal\t" << (write_time - beg).count() / (double)chrono::high_resolution_clock::period::den;
 	return 0;
 }
