@@ -71,16 +71,20 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     std::cout << label_cnt << "labels" << std::endl;
     std::cout << "reducing points" << std::endl;
     auto lc = gaei::count_label(label_cnt, vs);
-    gaei::remove_trivial_surface(lc, vs);
-    gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
-    gaei::thinout(vs);
+    //gaei::remove_trivial_surface(lc, vs);
+    //gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
+    //gaei::thinout(vs);
     gaei::normalize(vs);
 }
 std::vector<std::array<size_t, 3>> triangulate(const std::vector<gaei::vertex<>>& vs)
 {
     std::cout << "triangulate " << vs.size() << " points\n";
     ouchi::geometry::triangulation<gaei::vertex<>, 1000> t;
-    return t(vs.cbegin(), vs.cend(), t.return_as_idx);
+    auto v = t(vs.cbegin(), vs.cend(), t.return_as_idx);
+    std::sort(v.begin(), v.end());
+    auto e = std::unique(v.begin(), v.end());
+    std::cout << std::distance(e, v.end());
+    return std::move(v);
 }
 
 ouchi::result::result<std::monostate, std::string>
