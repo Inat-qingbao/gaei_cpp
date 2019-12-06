@@ -69,8 +69,8 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     gaei::remove_error_point(vs);
     std::cout << "labeling points..." << std::endl;
     auto label_cnt = ssi(vs);
-    std::cout << label_cnt << "labels" << std::endl;
-    std::cout << "reducing points" << std::endl;
+    std::cout << label_cnt << " labels" << std::endl;
+    std::cout << "reducing points..." << std::endl;
     auto lc = gaei::count_label(label_cnt, vs);
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
@@ -79,7 +79,7 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
 std::vector<std::array<size_t, 3>> triangulate(std::vector<gaei::vertex<>>& vs)
 {
     gaei::normalize(vs);
-    std::cout << "triangulate " << vs.size() << " points\n";
+    std::cout << "triangulate " << vs.size() << " points...\n";
     ouchi::geometry::triangulation<gaei::vertex<>, 1000> t(1.0e-5);
     std::shuffle(vs.begin(), vs.end(), std::mt19937{});
     auto v = t(vs.cbegin(), vs.cend(), t.return_as_idx);
