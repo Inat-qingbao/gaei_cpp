@@ -74,7 +74,7 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     auto lc = gaei::count_label(label_cnt, vs);
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
-    //gaei::thinout(vs);
+    gaei::thinout(vs);
 }
 std::vector<std::array<size_t, 3>> triangulate(std::vector<gaei::vertex<>>& vs)
 {
