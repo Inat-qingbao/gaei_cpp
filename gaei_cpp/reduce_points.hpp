@@ -50,7 +50,7 @@ inline void thinout(std::vector<vertex<>>& vs) noexcept
     std::sort(vs.begin(), vs.end(),
               [](auto&& a, auto&& b) {return a.position < b.position; });
     vs.erase(std::remove_if(vs.begin(), vs.end(),
-                            [idx = 0u](const vertex<>& v) mutable {return false; }),
+                            [idx = 0u](const vertex<>& v) mutable {return /*v.color.a() != 0 && */((int)v.position.x() % 3 || (int)v.position.y() % 3); }),
              vs.end());
 }
 
