@@ -74,7 +74,7 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     auto lc = gaei::count_label(label_cnt, vs);
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
-    gaei::thinout(vs);
+    gaei::thinout(vs, p.get<int>("thinout_width"));
 }
 std::vector<std::array<size_t, 3>> triangulate(std::vector<gaei::vertex<>>& vs)
 {
@@ -102,7 +102,7 @@ write(const std::vector<gaei::vertex<>>& vs,
     sp.geometry().coord_.assign(vs.begin(), vs.end());
     for (auto& f : tri) {
         for (auto idx : f) {
-            sp.geometry().coord_index_.push_back(idx);
+            sp.geometry().coord_index_.push_back((long)idx);
         }
         sp.geometry().coord_index_.push_back(-1);
     }
@@ -123,7 +123,8 @@ int main(int argc, const char** const argv)
         .add("out;o", "出力ファイル", po::default_value = "out.wrl"s, po::single<std::string>)
         .add("diff;d", "指定された値[m]だけzが異なる点に異なるラベルを付けます", po::single<float>, po::default_value = 1.0f)
         .add("nooutput;N", "ファイルへの出力を行いません", po::flag)
-        .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = (size_t)5);
+        .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = (size_t)5)
+        .add("thinout_width;w", "点を間引く幅を指定します", po::default_value = 2, po::single<int>);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
