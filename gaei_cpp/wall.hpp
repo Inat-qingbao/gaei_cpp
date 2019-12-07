@@ -34,4 +34,15 @@ inline void bounding_box(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ve
     vertexes.push_back({ {min_x,min_y,min_z},{} });
 }
 
+inline std::vector create_wall(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vertexes) {
+    auto end = vertexes.size()-1;
+    auto min_z = (vertexes[end-2].position.x()-vertexes[end].position.x())/2.0;
+    for (int i = end-4; i <end ; i++) {
+        vertexes.push_back({ {vertexes[i].position.x(),vertexes[i].position.y(),min_z},{} });
+    }
+    std::vector<long> coordindex;
+    cordindex = { end,end - 7,end - 6,end - 1,-1,end - 1,end - 4,end - 6,end - 3,-1,end - 3,end - 4,end - 5,end - 2,-1,end - 2,end - 5,end - 7,end,-1,end - 3,end - 2,end,end - 1,-1 };
+    return cordindex;
+}
+
 }
