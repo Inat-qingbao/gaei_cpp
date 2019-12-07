@@ -11,7 +11,7 @@ inline void bounding_box(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ve
     max_y = vertexes[0].position.y();
     min_y = vertexes[0].position.y();
     min_z = vertexes[0].position.z();
-    for (int i = 0; i < vertexes.size(); i++) {
+    for (unsigned i = 1; i < vertexes.size(); i++) {
         if (max_x < vertexes[i].position.x()) {
             max_x = vertexes[i].position.x();
         }
