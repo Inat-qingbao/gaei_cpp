@@ -36,4 +36,5 @@ add_executable (
     "test_ssi.cpp"
     "test_reduce_points.cpp"
     "test_normalize.cpp"
+    "test_create_wall.cpp"
 )
