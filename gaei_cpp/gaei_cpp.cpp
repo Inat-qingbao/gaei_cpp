@@ -83,6 +83,7 @@ std::vector<std::array<size_t, 3>> triangulate(std::vector<gaei::vertex<>>& vs)
     ouchi::geometry::triangulation<gaei::vertex<>, 1000> t(1.0e-5);
     std::shuffle(vs.begin(), vs.end(), std::mt19937{});
     auto v = t(vs.cbegin(), vs.cend(), t.return_as_idx);
+    std::cout << "post-processing..." << std::endl;
     std::sort(v.begin(), v.end());
     auto e = std::unique(v.begin(), v.end());
     std::cout << "fail:" << std::distance(e, v.end()) << std::endl;
