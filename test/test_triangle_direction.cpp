@@ -15,4 +15,8 @@ OUCHI_TEST_CASE(test_triangle_direction){
     vertexes[2].position = gaei::vec3f{ {3,1,0} };
     gaei::triangle_direction_judege(vertexes, as);
     OUCHI_CHECK_EQUAL(as[0][0],ans[0][0]);
+    as[0][0] = 2;
+    as[0][2] = 0;
+    gaei::triangle_direction_judege(vertexes, as);
+    OUCHI_CHECK_EQUAL(as[0][0], ans[0][0]);
 }
