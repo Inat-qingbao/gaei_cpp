@@ -5,7 +5,7 @@
 #include "vector_utl.hpp"
 
 namespace gaei{
-void triangle_direction_judege(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vertexes, std::vector<std::array<int,3>>& as) {
+inline void triangle_direction_judege(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vertexes, std::vector<std::array<int,3>>& as) {
     gaei::vector<double, 3> c, vab, vbc;
     for (int i = 0; i < as.size(); ++i) {
         vab.coord[0] = vertexes[as[i][1]].position.x() - vertexes[as[i][0]].position.x();
