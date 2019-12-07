@@ -28,6 +28,12 @@ inline void bounding_box(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ve
             min_z = vertexes[i].position.z();
         }
     }
+    max_x += 1;
+    min_x -= 1;
+    max_y += 1;
+    min_y -= 1;
+    min_z -= 1;
+
     vertexes.push_back({ {max_x,max_y,min_z},{} });
     vertexes.push_back({ {max_x,min_y,min_z},{} });
     vertexes.push_back({ {min_x,max_y,min_z},{} });
@@ -37,7 +43,7 @@ inline void bounding_box(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ve
 inline void create_wall(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vertexes,std::vector<long>& S) {
     long end = vertexes.size()-1;
     typename vec3f::value_type min_z = (vertexes[end-2].position.x()-vertexes[end].position.x())/2.0;
-    for (int i = end-4; i <end ; i++) {
+    for (int i = end-3; i <=end ; i++) {
         vertexes.push_back({ {vertexes[i].position.x(),vertexes[i].position.y(),min_z},{} });
     }
     end = vertexes.size();
