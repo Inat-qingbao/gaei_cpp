@@ -9,7 +9,7 @@ OUCHI_TEST_CASE(test_wall) {
     vertexes[2].position = gaei::vec3f{ {1,1,4} };
     s = { 0,1,2,-1 };
     auto ans = s;
-    ans.insert(ans.end(), { 11,4,5,10,-1, 10,5,7,8,-1, 8,7,6,9,-1, 9,6,4,11,-1, 8,9,11,10,-1 });
+    ans.insert(ans.end(), { 7,9,4,6,-1, 8,7,6,5,-1, 10,8,5,3,-1, 9,10,3,4,-1, 8,10,9,7,-1 });
 
     gaei::bounding_box(vertexes);
     gaei::create_wall(vertexes, s);

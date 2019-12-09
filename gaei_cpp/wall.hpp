@@ -48,11 +48,11 @@ inline void create_wall(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ver
     }
     end = vertexes.size() - 1;
     S.insert(S.end(),{
-        end,end - 7,end - 6,end - 1,-1,
-        end - 1,end - 6,end - 4,end - 3,-1,
-        end - 3,end - 4,end - 5,end - 2,-1,
-        end - 2,end - 5,end - 7,end,-1,
-        end - 3,end - 2,end,end - 1,-1 });
+        end - 3,end - 1,end - 6,end - 4,-1,
+        end - 2,end - 3,end - 4,end - 5,-1,
+        end,end - 2,end - 5,end - 7,-1,
+        end - 1,end,end - 7,end - 6,-1,
+        end - 2,end,end - 1,end - 3,-1 });
 }
 
 }
