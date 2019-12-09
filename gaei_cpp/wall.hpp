@@ -15,16 +15,16 @@ inline void bounding_box(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ve
         if (max_x < vertexes[i].position.x()) {
             max_x = vertexes[i].position.x();
         }
-        if (min_x > vertexes[i].position.x()) {
+        else if (min_x > vertexes[i].position.x()) {
             min_x = vertexes[i].position.x();
         }
         if (max_y < vertexes[i].position.y()) {
             max_y = vertexes[i].position.y();
         }
-        if (min_y > vertexes[i].position.y()) {
+        else if (min_y > vertexes[i].position.y()) {
             min_y = vertexes[i].position.y();
         }
-        if (min_z < vertexes[i].position.z()) {
+        if (min_z > vertexes[i].position.z()) {
             min_z = vertexes[i].position.z();
         }
     }
@@ -47,7 +47,12 @@ inline void create_wall(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ver
         vertexes.push_back({ {vertexes[i].position.x(),vertexes[i].position.y(),min_z},{} });
     }
     end = vertexes.size();
-    S.insert(S.end(),{ end,end - 7,end - 6,end - 1,-1,end - 1,end - 6,end - 4,end - 3,-1,end - 3,end - 4,end - 5,end - 2,-1,end - 2,end - 5,end - 7,end,-1,end - 3,end - 2,end,end - 1,-1 });
+    S.insert(S.end(),{
+        end,end - 7,end - 6,end - 1,-1,
+        end - 1,end - 6,end - 4,end - 3,-1,
+        end - 3,end - 4,end - 5,end - 2,-1,
+        end - 2,end - 5,end - 7,end,-1,
+        end - 3,end - 2,end,end - 1,-1 });
 }
 
 }
