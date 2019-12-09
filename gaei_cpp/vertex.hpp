@@ -4,6 +4,7 @@
 #include <algorithm>
 #include "color.hpp"
 #include "ouchilib/utl/multiitr.hpp"
+#include "ouchilib/geometry/point_traits.hpp"
 #include "meta.hpp"
 
 namespace gaei {
@@ -34,8 +35,6 @@ struct vector;
 /// <typeparam name="T">点の各次元の型</typeparam>
 template<class T, std::size_t Dim>
 struct vector<T, Dim, std::enable_if_t<(Dim > 0) && can_4_operation_v<T>, void>> {
-    // 四則演算が可能か？
-
     using value_type = T;
     static constexpr size_t dimension = Dim;
 
@@ -180,8 +179,8 @@ struct vector<T, Dim, std::enable_if_t<(Dim > 0) && can_4_operation_v<T>, void>>
     }
 };
 
-using vec2f = vector<float, 2>;
-using vec3f = vector<float, 3>;
+using vec2f = vector<double, 2>;
+using vec3f = vector<double, 3>;
 
 template<class PosT = vec3f, class ColorT = color>
 struct vertex {

@@ -33,8 +33,9 @@ add_executable (
 	"test_color.cpp"
 	"test_vec_utl.cpp"
 	"test_vrml_writer.cpp"
-    "test_ssi.cpp"
-    "test_reduce_points.cpp"
-    "test_normalize.cpp"
-    "test_triangle_direction.cpp"
+  "test_ssi.cpp"
+  "test_reduce_points.cpp"
+  "test_normalize.cpp"
+  "test_triangle_direction.cpp"
+  "test_create_wall.cpp"
 )
