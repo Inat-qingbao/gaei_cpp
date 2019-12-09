@@ -17,6 +17,7 @@
 #include "surface_structure_isolate.hpp"
 #include "reduce_points.hpp"
 #include "normalize.hpp"
+#include "wall.hpp"
 
 #include "ouchilib/geometry/triangulation.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
@@ -76,8 +77,12 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
     gaei::thinout(vs, p.get<int>("thinout_width"));
 }
-std::vector<std::array<size_t, 3>> triangulate(std::vector<gaei::vertex<>>& vs)
+std::vector<long> triangulate(std::vector<gaei::vertex<>>& vs,
+                                               const ouchi::program_options::arg_parser& p)
 {
+    if (p.exist("printer")) {
+        gaei::bounding_box(vs);
+    }
     gaei::normalize(vs);
     std::cout << "triangulate " << vs.size() << " points...\n";
     ouchi::geometry::triangulation<gaei::vertex<>, 1000> t(1.0e-5);
@@ -87,30 +92,36 @@ std::vector<std::array<size_t, 3>> triangulate(std::vector<gaei::vertex<>>& vs)
     auto e = std::unique(v.begin(), v.end());
     std::cout << "fail:" << std::distance(e, v.end()) << std::endl;
     gaei::inv_normalize(vs);
-    return std::move(v);
+    std::vector<long> faces;
+    faces.reserve(v.size() * 4 + 128);
+    for (auto& f : v) {
+        for (auto idx : f) {
+            faces.push_back((long)idx);
+        }
+        faces.push_back(-1);
+    }
+    if (p.exist("printer")) {
+        gaei::create_wall(vs, faces);
+    }
+    return std::move(faces);
 }
 
 ouchi::result::result<std::monostate, std::string>
 write(const std::vector<gaei::vertex<>>& vs,
-      const std::vector<std::array<size_t, 3>>& tri,
+      const std::vector<long>& faces,
       std::string path)
 {
     namespace vrml = gaei::vrml;
     vrml::vrml_writer vw;
     vrml::shape<vrml::indexed_face_set, vrml::appearance<>> sp;
     sp.geometry().coord_.assign(vs.begin(), vs.end());
-    for (auto& f : tri) {
-        for (auto idx : f) {
-            sp.geometry().coord_index_.push_back((long)idx);
-        }
-        sp.geometry().coord_index_.push_back(-1);
-    }
+    sp.geometry().coord_index_ = faces;
     vw.push(std::move(sp));
     std::cout << "writing " << vs.size() << " points to " << path << '\n';
     return vw.write(path);
 }
 
-int main(int argc, const char** const argv)
+int main(const int argc, const char** const argv)
 {
     namespace po = ouchi::program_options;
     namespace chrono = std::chrono;
@@ -123,7 +134,8 @@ int main(int argc, const char** const argv)
         .add("diff;d", "指定された値[m]だけzが異なる点に異なるラベルを付けます", po::single<float>, po::default_value = 1.0f)
         .add("nooutput;N", "ファイルへの出力を行いません", po::flag)
         .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = (size_t)5)
-        .add("thinout_width;w", "点を間引く幅を指定します", po::default_value = 2, po::single<int>);
+        .add("thinout_width;w", "点を間引く幅を指定します", po::default_value = 2, po::single<int>)
+        .add("printer;p", "3Dプリンター用にデータを加工します。", po::flag);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
@@ -133,7 +145,7 @@ int main(int argc, const char** const argv)
         std::cout << "少なくとも一つ以上のファイルまたはディレクトリが入力されていなければなりません\n";
         std::cout << d << std::endl;
         return -1;
-    }    
+    }
     auto r = load(in);
     auto load_time = chrono::high_resolution_clock::now();
     if (!r) {
@@ -141,12 +153,13 @@ int main(int argc, const char** const argv)
         return -1;
     }
     auto v = r.unwrap();
+    if (p.exist("printer")) std::cout << "out for 3D printer\n";
     label(v, p);
     auto label_time = chrono::high_resolution_clock::now();
-    auto tri = triangulate(v);
+    auto tri = triangulate(v, p);
     auto tri_time = chrono::high_resolution_clock::now();
     auto out_path = p.get<std::string>("out");
-    if (!p.exist("nooutput"))write(v, tri,out_path).unwrap_or_else([](auto e)->std::monostate {std::cout << e; return {}; });
+    if (!p.exist("nooutput")) write(v, tri,out_path).unwrap_or_else([](auto e)->std::monostate {std::cout << e; return {}; });
     auto write_time = chrono::high_resolution_clock::now();
     std::cout << "out:" << out_path << std::endl;
     std::cout << "elappsed time"
