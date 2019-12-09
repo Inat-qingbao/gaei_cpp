@@ -13,5 +13,5 @@ OUCHI_TEST_CASE(test_wall) {
 
     gaei::bounding_box(vertexes);
     gaei::create_wall(vertexes, s);
-    OUCHI_CHECK_EQUAL(s[3],ans[3]);
+    OUCHI_CHECK_EQUAL(s, ans);
 }

@@ -46,7 +46,7 @@ inline void create_wall(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ver
     for (int i = end-3; i <=end ; i++) {
         vertexes.push_back({ {vertexes[i].position.x(),vertexes[i].position.y(),min_z},{} });
     }
-    end = vertexes.size();
+    end = vertexes.size() - 1;
     S.insert(S.end(),{
         end,end - 7,end - 6,end - 1,-1,
         end - 1,end - 6,end - 4,end - 3,-1,
