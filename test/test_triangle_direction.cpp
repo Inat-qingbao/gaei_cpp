@@ -11,12 +11,12 @@ OUCHI_TEST_CASE(test_triangle_direction){
     ans = as;
     vertexes.resize(3);
     vertexes[0].position = gaei::vec3f{ {0,0,0} };
-    vertexes[1].position = gaei::vec3f{ {3,0,3} };
-    vertexes[2].position = gaei::vec3f{ {3,1,0} };
+    vertexes[1].position = gaei::vec3f{ {2,1.9,-0.1} };
+    vertexes[2].position = gaei::vec3f{ {1,1,4} };
     gaei::triangle_direction_judege(vertexes, as);
-    OUCHI_CHECK_EQUAL(as[0][0],ans[0][0]);
+    OUCHI_CHECK_EQUAL(as,ans);
     as[0][0] = 2;
     as[0][2] = 0;
     gaei::triangle_direction_judege(vertexes, as);
-    OUCHI_CHECK_EQUAL(as[0][0], ans[0][0]);
+    OUCHI_CHECK_EQUAL(as, ans);
 }
