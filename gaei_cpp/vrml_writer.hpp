@@ -238,16 +238,24 @@ struct appearance {
     }
 };
 
-class indexed_face_set {
-    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> vertexes_;
+struct indexed_face_set {
+    std::vector<gaei::vertex<>> coord_;
+    std::vector<long> coord_index_;
+    bool ccw = true;
+    bool convex = false;
+    bool solid = false;
 public:
     ouchi::result::result<std::monostate, std::string>
     write(std::ostream& out) const
     {
         std::string buffer;
         ouchi::result::result<std::monostate, std::string> success = ouchi::result::ok{ std::monostate{} };
-        buffer.reserve(vertexes_.size() * 128);
+        buffer.reserve(coord_.size() * 128);
         buffer.append("geometry IndexedFaceSet{\n");
+        buffer.append("\nccw "); buffer.append(ccw ? "TRUE" : "FALSE");
+        buffer.append("\nconvex ");buffer.append(convex ? "TRUE" : "FALSE");
+        buffer.append("\nsolid ");buffer.append(solid ? "TRUE" : "FALSE");
+        buffer.append("\n");
         auto [s, write] = write_coord(buffer);
         success = success && s;
         success = success && write_color(buffer, write);
@@ -258,15 +266,15 @@ public:
             ? ouchi::result::result<std::monostate, std::string>{ouchi::result::ok{ std::monostate{} }}
             : ouchi::result::result<std::monostate, std::string>{ ouchi::result::err{detail::stream_error_message(out)} };
     }
-    auto& data() noexcept { return vertexes_; }
-    const auto& data() const noexcept { return vertexes_; }
+    auto& data() noexcept { return coord_; }
+    const auto& data() const noexcept { return coord_; }
 private:
     ouchi::result::result<std::monostate, std::string>
     write_color(std::string& out, bool write) const
     {
         if (!write) return ouchi::result::ok{ std::monostate{} };
         out.append("color Color{color[");
-        for (auto&& v : vertexes_) {
+        for (auto&& v : coord_) {
             if (auto r = to_vrml(v.color, out); !r) return ouchi::result::err{std::make_error_code(r.unwrap_err()).message()};
             out.push_back('\n');
         }
@@ -279,13 +287,21 @@ private:
         bool is_color_none = false;
         out.append("coord Coordinate{");
         out.append("point[");
-        for (const auto& v : vertexes_) {
+        for (const auto& v : coord_) {
             if (auto r = to_vrml(v.position, out); !r) return { ouchi::result::err{std::make_error_code(r.unwrap_err()).message()}, false };
             out.push_back('\n');
             is_color_none |= (bool)v.color;
         }
         out.append("]\n");
         out.append("}\n");
+        out.append("coordIndex [\n");
+        for(auto&& idx : coord_index_){
+            char buffer[16] = {};
+            std::to_chars(buffer, buffer+16, idx);
+            out.append(buffer);
+            out.push_back(' ');
+        }
+        out.append("]");
         return { ouchi::result::ok{ std::monostate{} }, is_color_none };
     }
 };
@@ -309,7 +325,7 @@ struct box {
 };
 
 struct point_set {
-    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> points;
+    std::vector<gaei::vertex<>> points;
     ouchi::result::result<std::monostate, std::string>
     write(std::ostream& out) const
     {

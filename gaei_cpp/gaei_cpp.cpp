@@ -8,19 +8,23 @@
 #include <filesystem>
 #include <memory>
 #include <chrono>
+#include <random>
 #include "vertex.hpp"
+#include "vector_utl.hpp"
 #include "color.hpp"
 #include "dat_loader.hpp"
 #include "vrml_writer.hpp"
 #include "surface_structure_isolate.hpp"
 #include "reduce_points.hpp"
 #include "normalize.hpp"
+
+#include "ouchilib/geometry/triangulation.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
 #include "ouchilib/result/result.hpp"
 
 [[nodiscard]]
 ouchi::result::result<std::monostate, std::string>
-load(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& buf,
+load(std::vector<gaei::vertex<>>& buf,
      const std::filesystem::path& p)
 {
     using namespace std::string_literals;
@@ -45,11 +49,11 @@ load(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& buf,
 }
 
 [[nodiscard]]
-ouchi::result::result<std::vector<gaei::vertex<gaei::vec3f, gaei::color>>, std::string>
+ouchi::result::result<std::vector<gaei::vertex<>>, std::string>
 load(const std::vector<std::string>& path)
 {
 
-    std::vector<gaei::vertex<gaei::vec3f, gaei::color>> ret;
+    std::vector<gaei::vertex<>> ret;
     std::filesystem::path fp;
     for (auto&& p : path) {
         fp.assign(p);
@@ -58,29 +62,49 @@ load(const std::vector<std::string>& path)
     return ouchi::result::ok(std::move(ret));
 }
 
-void calc(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_parser& p)
+void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_parser& p)
 {
     gaei::surface_structure_isolate ssi{ p.get<float>("diff") };
     std::cout << "calclating " << vs.size() << " points...\n";
     gaei::remove_error_point(vs);
     std::cout << "labeling points..." << std::endl;
     auto label_cnt = ssi(vs);
-    std::cout << label_cnt << "labels" << std::endl;
-    std::cout << "reducing points" << std::endl;
+    std::cout << label_cnt << " labels" << std::endl;
+    std::cout << "reducing points..." << std::endl;
     auto lc = gaei::count_label(label_cnt, vs);
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
+    gaei::thinout(vs, p.get<int>("thinout_width"));
+}
+std::vector<std::array<size_t, 3>> triangulate(std::vector<gaei::vertex<>>& vs)
+{
     gaei::normalize(vs);
+    std::cout << "triangulate " << vs.size() << " points...\n";
+    ouchi::geometry::triangulation<gaei::vertex<>, 1000> t(1.0e-5);
+    auto v = t(vs.cbegin(), vs.cend(), t.return_as_idx);
+    std::cout << "post-processing..." << std::endl;
+    std::sort(v.begin(), v.end());
+    auto e = std::unique(v.begin(), v.end());
+    std::cout << "fail:" << std::distance(e, v.end()) << std::endl;
+    gaei::inv_normalize(vs);
+    return std::move(v);
 }
 
 ouchi::result::result<std::monostate, std::string>
-write(const std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& vs,
-           std::string path)
+write(const std::vector<gaei::vertex<>>& vs,
+      const std::vector<std::array<size_t, 3>>& tri,
+      std::string path)
 {
     namespace vrml = gaei::vrml;
     vrml::vrml_writer vw;
-    vrml::shape<vrml::point_set, vrml::appearance<>> sp;
-    sp.geometry().points.assign(vs.begin(), vs.end());
+    vrml::shape<vrml::indexed_face_set, vrml::appearance<>> sp;
+    sp.geometry().coord_.assign(vs.begin(), vs.end());
+    for (auto& f : tri) {
+        for (auto idx : f) {
+            sp.geometry().coord_index_.push_back((long)idx);
+        }
+        sp.geometry().coord_index_.push_back(-1);
+    }
     vw.push(std::move(sp));
     std::cout << "writing " << vs.size() << " points to " << path << '\n';
     return vw.write(path);
@@ -98,7 +122,8 @@ int main(int argc, const char** const argv)
         .add("out;o", "出力ファイル", po::default_value = "out.wrl"s, po::single<std::string>)
         .add("diff;d", "指定された値[m]だけzが異なる点に異なるラベルを付けます", po::single<float>, po::default_value = 1.0f)
         .add("nooutput;N", "ファイルへの出力を行いません", po::flag)
-        .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = (size_t)5);
+        .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = (size_t)5)
+        .add("thinout_width;w", "点を間引く幅を指定します", po::default_value = 2, po::single<int>);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
@@ -116,17 +141,20 @@ int main(int argc, const char** const argv)
         return -1;
     }
     auto v = r.unwrap();
-    calc(v, p);
-    auto calc_time = chrono::high_resolution_clock::now();
+    label(v, p);
+    auto label_time = chrono::high_resolution_clock::now();
+    auto tri = triangulate(v);
+    auto tri_time = chrono::high_resolution_clock::now();
     auto out_path = p.get<std::string>("out");
-    if (!p.exist("nooutput"))write(v, out_path).unwrap_or_else([](auto e)->std::monostate {std::cout << e; return {}; });
+    if (!p.exist("nooutput"))write(v, tri,out_path).unwrap_or_else([](auto e)->std::monostate {std::cout << e; return {}; });
     auto write_time = chrono::high_resolution_clock::now();
     std::cout << "out:" << out_path << std::endl;
     std::cout << "elappsed time"
         << "\nparse\t" << (parse_time - beg).count() / (double)chrono::high_resolution_clock::period::den
         << "\nload\t" << (load_time - parse_time).count() / (double)chrono::high_resolution_clock::period::den
-        << "\ncalc\t" << (calc_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
-        << "\nwrite\t" << (write_time - calc_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\nlabel\t" << (label_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\ntri\t" << (tri_time - load_time).count() / (double)chrono::high_resolution_clock::period::den
+        << "\nwrite\t" << (write_time - tri_time).count() / (double)chrono::high_resolution_clock::period::den
         << "\ntotal\t" << (write_time - beg).count() / (double)chrono::high_resolution_clock::period::den;
 	return 0;
 }
