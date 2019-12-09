@@ -78,8 +78,9 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     gaei::thinout(vs, p.get<int>("thinout_width"));
 }
 std::vector<long> triangulate(std::vector<gaei::vertex<>>& vs,
-                                               const ouchi::program_options::arg_parser& p)
+                              const ouchi::program_options::arg_parser& p)
 {
+    std::vector<long> faces;
     if (p.exist("printer")) {
         gaei::bounding_box(vs);
     }
@@ -87,13 +88,14 @@ std::vector<long> triangulate(std::vector<gaei::vertex<>>& vs,
     std::cout << "triangulate " << vs.size() << " points...\n";
     ouchi::geometry::triangulation<gaei::vertex<>, 1000> t(1.0e-5);
     auto v = t(vs.cbegin(), vs.cend(), t.return_as_idx);
+
+    faces.reserve(v.size() * 4 + 128);
+
     std::cout << "post-processing..." << std::endl;
     std::sort(v.begin(), v.end());
     auto e = std::unique(v.begin(), v.end());
     std::cout << "fail:" << std::distance(e, v.end()) << std::endl;
     gaei::inv_normalize(vs);
-    std::vector<long> faces;
-    faces.reserve(v.size() * 4 + 128);
     for (auto& f : v) {
         for (auto idx : f) {
             faces.push_back((long)idx);
