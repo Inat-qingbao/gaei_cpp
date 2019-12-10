@@ -131,7 +131,7 @@ write(const std::vector<gaei::vertex<>>& vs,
 }
 
 int main(const int argc, const char** const argv)
-{
+try {
     namespace po = ouchi::program_options;
     namespace chrono = std::chrono;
     using namespace std::literals;
@@ -179,4 +179,6 @@ int main(const int argc, const char** const argv)
         << "\nwrite\t" << (write_time - tri_time).count() / (double)chrono::high_resolution_clock::period::den
         << "\ntotal\t" << (write_time - beg).count() / (double)chrono::high_resolution_clock::period::den;
 	return 0;
+} catch (std::exception& e) {
+    std::cerr << e.what() << '\n';
 }
