@@ -45,6 +45,22 @@ inline void remove_error_point(std::vector<vertex<>>& vs) noexcept
     std::cout << "removed error:" << b - vs.size() << '\n';
 }
 
+inline void extract_ground(const std::vector<size_t>& lc, std::vector<vertex<>>& vs)
+{
+    auto ground = std::distance(lc.cbegin(), std::max_element(lc.cbegin(), lc.cend()));
+    vs.erase(std::remove_if(vs.begin(), vs.end(),
+                            [ground](const vertex<>& v) { return ground != idx_to_color(v.color.value()); }),
+             vs.end());
+}
+inline void extract_building(const std::vector<size_t>& lc, std::vector<vertex<>>& vs)
+{
+    auto ground = std::distance(lc.cbegin(), std::max_element(lc.cbegin(), lc.cend()));
+    vs.erase(std::remove_if(vs.begin(), vs.end(),
+                            [ground](const vertex<>& v) { return ground == idx_to_color(v.color.value()); }),
+             vs.end());
+
+}
+
 inline void thinout(std::vector<vertex<>>& vs, int width) noexcept
 {
     std::sort(vs.begin(), vs.end(),
