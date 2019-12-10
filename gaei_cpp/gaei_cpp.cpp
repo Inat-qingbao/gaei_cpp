@@ -18,6 +18,7 @@
 #include "reduce_points.hpp"
 #include "normalize.hpp"
 #include "wall.hpp"
+#include "triangle_direction.hpp"
 
 #include "ouchilib/geometry/triangulation.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
@@ -96,6 +97,7 @@ std::vector<long> triangulate(std::vector<gaei::vertex<>>& vs,
     auto e = std::unique(v.begin(), v.end());
     std::cout << "fail:" << std::distance(e, v.end()) << std::endl;
     gaei::inv_normalize(vs);
+    gaei::triangle_direction_judege(vs, v);
     for (auto& f : v) {
         for (auto idx : f) {
             faces.push_back((long)idx);
@@ -117,6 +119,7 @@ write(const std::vector<gaei::vertex<>>& vs,
     vrml::vrml_writer vw;
     vrml::shape<vrml::indexed_face_set, vrml::appearance<>> sp;
     sp.geometry().coord_.reserve(vs.size());
+    sp.geometry().solid = false;
     for (auto& p : vs) {
         sp.geometry().coord_.push_back(
             {
