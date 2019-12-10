@@ -18,6 +18,7 @@
 #include "reduce_points.hpp"
 #include "normalize.hpp"
 #include "wall.hpp"
+#include "triangle_direction.hpp"
 
 #include "ouchilib/geometry/triangulation.hpp"
 #include "ouchilib/program_options/program_options_parser.hpp"
@@ -73,9 +74,12 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     std::cout << label_cnt << " labels" << std::endl;
     std::cout << "reducing points..." << std::endl;
     auto lc = gaei::count_label(label_cnt, vs);
+    if (p.exist("onlyground")) { gaei::extract_ground(lc, vs); }
+    else if (p.exist("onlybuilding")) { gaei::extract_building(lc, vs); }
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
     gaei::thinout(vs, p.get<int>("thinout_width"));
+    gaei::simplify_color(lc, vs);
 }
 std::vector<long> triangulate(std::vector<gaei::vertex<>>& vs,
                               const ouchi::program_options::arg_parser& p)
@@ -86,7 +90,7 @@ std::vector<long> triangulate(std::vector<gaei::vertex<>>& vs,
     }
     gaei::normalize(vs);
     std::cout << "triangulate " << vs.size() << " points...\n";
-    ouchi::geometry::triangulation<gaei::vertex<>, 1000> t(1.0e-5);
+    ouchi::geometry::triangulation<gaei::vertex<>, 1000> t;
     auto v = t(vs.cbegin(), vs.cend(), t.return_as_idx);
 
     faces.reserve(v.size() * 4 + 128);
@@ -95,6 +99,7 @@ std::vector<long> triangulate(std::vector<gaei::vertex<>>& vs,
     std::sort(v.begin(), v.end());
     auto e = std::unique(v.begin(), v.end());
     std::cout << "fail:" << std::distance(e, v.end()) << std::endl;
+    gaei::triangle_direction_judege(vs, v);
     gaei::inv_normalize(vs);
     for (auto& f : v) {
         for (auto idx : f) {
@@ -117,6 +122,7 @@ write(const std::vector<gaei::vertex<>>& vs,
     vrml::vrml_writer vw;
     vrml::shape<vrml::indexed_face_set, vrml::appearance<>> sp;
     sp.geometry().coord_.reserve(vs.size());
+    sp.geometry().solid = false;
     for (auto& p : vs) {
         sp.geometry().coord_.push_back(
             {
@@ -144,7 +150,9 @@ try {
         .add("nooutput;N", "ファイルへの出力を行いません", po::flag)
         .add("remove_minor_labels_threshold;t", "指定された値以下のサイズのラベルを削除します", po::single<size_t>, po::default_value = (size_t)5)
         .add("thinout_width;w", "点を間引く幅を指定します", po::default_value = 2, po::single<int>)
-        .add("printer;p", "3Dプリンター用にデータを加工します。", po::flag);
+        .add("printer;p", "3Dプリンター用にデータを加工します。", po::flag)
+        .add("onlyground;g", "地面と判定された点だけ出力します。", po::flag)
+        .add("onlybuilding;b", "建物と判定された点だけ出力します。printerオプションと併用する場合動作は未定義です。", po::flag);
 
     po::arg_parser p;
     p.parse(d, argv, argc); 
