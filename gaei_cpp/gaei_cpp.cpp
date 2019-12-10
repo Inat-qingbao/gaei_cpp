@@ -79,6 +79,7 @@ void label(std::vector<gaei::vertex<>>& vs, const ouchi::program_options::arg_pa
     gaei::remove_trivial_surface(lc, vs);
     gaei::remove_minor_labels(lc, vs, p.get<size_t>("remove_minor_labels_threshold"));
     gaei::thinout(vs, p.get<int>("thinout_width"));
+    gaei::simplify_color(lc, vs);
 }
 std::vector<long> triangulate(std::vector<gaei::vertex<>>& vs,
                               const ouchi::program_options::arg_parser& p)
