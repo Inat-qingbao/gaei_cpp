@@ -28,11 +28,11 @@ inline void bounding_box(std::vector<gaei::vertex<gaei::vec3f, gaei::color>>& ve
             min_z = vertexes[i].position.z();
         }
     }
-    max_x += 1;
-    min_x -= 1;
-    max_y += 1;
-    min_y -= 1;
-    min_z -= 1;
+    max_x += 16;
+    min_x -= 16;
+    max_y += 16;
+    min_y -= 16;
+    min_z -= 16;
 
     vertexes.push_back({ {max_x,max_y,min_z},{} });
     vertexes.push_back({ {max_x,min_y,min_z},{} });

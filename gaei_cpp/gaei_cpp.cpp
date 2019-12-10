@@ -116,7 +116,14 @@ write(const std::vector<gaei::vertex<>>& vs,
     namespace vrml = gaei::vrml;
     vrml::vrml_writer vw;
     vrml::shape<vrml::indexed_face_set, vrml::appearance<>> sp;
-    sp.geometry().coord_.assign(vs.begin(), vs.end());
+    sp.geometry().coord_.reserve(vs.size());
+    for (auto& p : vs) {
+        sp.geometry().coord_.push_back(
+            {
+                {p.position.y(), p.position.z(), p.position.x()}
+                ,p.color
+            });
+    }
     sp.geometry().coord_index_ = faces;
     vw.push(std::move(sp));
     std::cout << "writing " << vs.size() << " points to " << path << '\n';
